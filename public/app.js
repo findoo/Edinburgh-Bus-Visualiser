@@ -35,13 +35,12 @@ myApp.controller('trackerController', function ($scope, $http, moment, md5) {
         $http.get($scope.baseUrl + '/getBusStops')
             .then(function (response) {
                 $scope.stops = response.data.busStops;
-                console.log(response.data);
             });
     }
 
     function cleanMap() {
         if ($scope.selectedMarker !== undefined && $scope.selectedMarker !== null) {
-            if ($scope.selectedMarker.infoWindow !== null) {
+            if ($scope.selectedMarker.infoWindow !== undefined && $scope.selectedMarker.infoWindow !== null) {
                 $scope.selectedMarker.infoWindow.close();
             }
         }
@@ -94,14 +93,8 @@ myApp.controller('trackerController', function ($scope, $http, moment, md5) {
                             cleanMap();
 
                             $scope.selectedMarker = marker;
-                            $scope.selectedMarker.infoWindow = new google.maps.InfoWindow({
-                                content: 'Id: ' + marker.busId + '; Service: ' +
-                                    marker.mnemoService
-                            });
-                            $scope.selectedMarker.infoWindow.open(map, marker);
 
-
-                            // route polyline
+                            var content = "<div style=\"width:250px; max-height:172px; overflow:auto;\"><h3>Bus: " + marker.busId + ", Service: " + marker.mnemoService + "</h3><ul>";
                             if (element.nextStop != "") {
                                 $http.get($scope.baseUrl + '/getRoute/' + element.busId + '/' + element.journeyId + '/' + element.nextStop)
                                     .then(function (response) {
@@ -109,16 +102,25 @@ myApp.controller('trackerController', function ($scope, $http, moment, md5) {
                                             lat: element.lat,
                                             lng: element.lon
                                         }];
-                                        response.data.journeyTimes[0].journeyTimeDatas.forEach(function (routeStop) {
-                                            $scope.stops.forEach(function (stop) {
-                                                if (stop.stopId === routeStop.stopId) {
+
+                                        response.data.journeyTimes[0].journeyTimeDatas.forEach(function (stop) {
+                                            content += "<li>" + stop.stopName + ": " + stop.time;
+
+                                            $scope.stops.forEach(function (cachedStop) {
+                                                if (cachedStop.stopId === stop.stopId) {
                                                     route.push({
-                                                        lat: stop.x,
-                                                        lng: stop.y
+                                                        lat: cachedStop.x,
+                                                        lng: cachedStop.y
                                                     });
                                                 }
                                             });
                                         });
+                                        content += "</ul>";
+
+                                        $scope.selectedMarker.infoWindow = new google.maps.InfoWindow({
+                                            content: content
+                                        });
+                                        $scope.selectedMarker.infoWindow.open(map, marker);
 
                                         var lineSymbol = {
                                             path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW
@@ -145,6 +147,12 @@ myApp.controller('trackerController', function ($scope, $http, moment, md5) {
                                             map: map
                                         });
                                     });
+                            } else {
+                                var content = "<h3>Bus: " + marker.busId + ", Service: " + marker.mnemoService + "</h3>Not in service";
+                                $scope.selectedMarker.infoWindow = new google.maps.InfoWindow({
+                                    content: content
+                                });
+                                $scope.selectedMarker.infoWindow.open(map, marker);
                             }
                         });
 
@@ -166,6 +174,7 @@ myApp.controller('trackerController', function ($scope, $http, moment, md5) {
     }
 
     $scope.dropdownSelected = "All";
+    $scope.showStops = false;
     $scope.refresh = function () {
         getBusesByService($scope.dropdownSelected);
     }
