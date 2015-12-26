@@ -16,6 +16,21 @@ myApp.controller('trackerController', function ($scope, $http, moment, md5) {
             tram: 'images/tramicon.png'
         };
 
+    function initMap() {
+        map = new google.maps.Map(document.getElementById('gmap'), {
+            center: {
+                lat: 55.961776,
+                lng: -3.201612
+            },
+            scrollwheel: true,
+            zoom: 12
+        });
+
+        getServices();
+        getBusesByService("All");
+        getBusStops();
+    }
+
     function isNumeric(n) {
         return !isNaN(parseFloat(n)) && isFinite(n);
     }
@@ -148,9 +163,8 @@ myApp.controller('trackerController', function ($scope, $http, moment, md5) {
                                         });
                                     });
                             } else {
-                                var content = "<h3>Bus: " + marker.busId + ", Service: " + marker.mnemoService + "</h3>Not in service";
                                 $scope.selectedMarker.infoWindow = new google.maps.InfoWindow({
-                                    content: content
+                                    content: "<h3>Bus: " + marker.busId + ", Service: " + marker.mnemoService + "</h3>Not in service"
                                 });
                                 $scope.selectedMarker.infoWindow.open(map, marker);
                             }
@@ -162,25 +176,11 @@ myApp.controller('trackerController', function ($scope, $http, moment, md5) {
             });
     }
 
-    function initMap() {
-        map = new google.maps.Map(document.getElementById('gmap'), {
-            center: {
-                lat: 55.961776,
-                lng: -3.201612
-            },
-            scrollwheel: true,
-            zoom: 12
-        });
-    }
-
     $scope.dropdownSelected = "All";
     $scope.showStops = false;
     $scope.refresh = function () {
         getBusesByService($scope.dropdownSelected);
     }
 
-    getServices();
-    getBusesByService("All");
     initMap();
-    getBusStops();
 });
