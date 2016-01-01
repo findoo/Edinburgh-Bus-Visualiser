@@ -1,15 +1,27 @@
 {
     "name": "edinburghvisualiser",
     "version": "1.0.0",
-    "description": "",
-    "main": "server.js",
+    "description": "A visualisation of Edinburgh's bus and tram network",
+    "main": "./app/server.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
-        "start": "node server.js"
+        "test": "mocha test",
+        "start": "node ./server/server.js"
     },
     "author": "Finlay Smith",
     "license": "ISC",
     "dependencies": {
-        "express": "^4.13.3"
+        "chai": "^3.4.1",
+        "chai-http": "^1.0.0",
+        "express": "^4.13.3",
+        "mocha": "^2.3.4",
+        "bngconvert": "^1.0.0",
+        "grunt": "~0.4.1",
+        "matchdep": "~0.1.2"
+    },
+    "devDependencies": {
+        "css-condense": "0.0.6",
+        "grunt-contrib-cssmin": "^0.10.0",
+        "grunt-contrib-jshint": "^0.10.0",
+        "grunt-htmlhint": "^0.4.1"
     }
 }

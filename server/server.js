@@ -17,7 +17,7 @@ if (mode !== "DEV") {
     port = 80;
 }
 
-app.use(express.static('public'));
+app.use(express.static('webapp'));
 
 function getAPIKey() {
     var date = new moment().add(timeOffset, 'h').format("YYYYMMDDHH");
@@ -59,7 +59,7 @@ function busLocationParsing(input, service) {
         obj.lon = coordinates[1];
 
         if (service !== "All") {
-            if (obj['refService'] == service) {
+            if (obj.refService == service) {
                 result.push(obj);
             }
         } else {
@@ -75,14 +75,14 @@ function getGzipped(url, callback) {
         var gunzip = zlib.createGunzip();
         res.pipe(gunzip);
         gunzip.on('data', function (data) {
-            buffer.push(data.toString())
+            buffer.push(data.toString());
         }).on("end", function () {
             callback(null, buffer.join(""));
         }).on("error", function (e) {
             callback(e);
-        })
+        });
     }).on('error', function (e) {
-        callback(e)
+        callback(e);
     });
 }
 
@@ -95,14 +95,19 @@ app.get('/getServices', function (req, res) {
             res.setHeader('Content-Type', 'application/json');
             res.send(JSON.stringify(body));
         }
-    })
+    });
 });
 
 app.get('/getBuses/:service', function (req, res) {
-    getGzipped("http://ws.mybustracker.co.uk/?module=csv&key=" + getAPIKey() + "&function=getVehicleLocations", function (err, data) {
-        res.setHeader('Content-Type', 'application/json');
-        var returnData = busLocationParsing(data, req.params.service);
-        res.send(returnData);
+    getGzipped("http://ws.mybustracker.co.uk/?module=csv&key=" + getAPIKey() + "&function=getVehicleLocations", function (error, data) {
+        if (!error) {
+            res.setHeader('Content-Type', 'application/json');
+            var returnData = busLocationParsing(data, req.params.service);
+            res.send(returnData);
+        } else {
+            console.log(err);
+            res.send("Error fetching bus GPS");
+        }
     });
 });
 
@@ -111,11 +116,14 @@ app.get('/getBusStops', function (req, res) {
         url: "http://ws.mybustracker.co.uk/?module=json&key=" + getAPIKey() + "&function=getBusStops",
         json: true
     }, function (error, response, body) {
-        if (!error && response.statusCode === 200) {
+        if (!error) {
             res.setHeader('Content-Type', 'application/json');
             res.send(JSON.stringify(body));
+        } else {
+            console.log(error);
+            res.send("Error fetching bus stops");
         }
-    })
+    });
 });
 
 app.get('/getRoute/:busId/:journeyId/:nextStop', function (req, res) {
@@ -124,13 +132,17 @@ app.get('/getRoute/:busId/:journeyId/:nextStop', function (req, res) {
         url: "http://ws.mybustracker.co.uk/?module=json&key=" + getAPIKey() + "&function=getJourneyTimes&stopId=" + par.nextStop + "&journeyId=" + par.journeyId + "&busId=" + par.busId,
         json: true
     }, function (error, response, body) {
-        if (!error && response.statusCode === 200) {
+        if (!error) {
             res.setHeader('Content-Type', 'application/json');
             res.send(JSON.stringify(body));
+        } else {
+            console.log(error);
+            res.send("Error fetching journey times");
         }
-    })
+    });
 });
 
 var server = app.listen(port, function () {
     console.log("Server running in mode: " + mode);
 });
+module.exports = server;
