@@ -3,21 +3,39 @@ var moment = require('moment');
 var request = require('request');
 var crypto = require('crypto');
 var express = require('express');
+var compress = require('compression');
 var zlib = require("zlib");
 var csv = require("csv");
 var bngconvert = require("bngconvert");
 
 var app = express();
 
-var mode = "DEV",
-    timeOffset = 0,
-    port = 8000;
-if (mode !== "DEV") {
+var timeOffset = 0,
+    port = 8000,
+    maxAge = 0,
+    mode = "DEV";
+if (process.argv[2] != undefined && process.argv[2] == "PROD") {
     timeOffset = 5;
     port = 80;
+    maxAge = 2629746000;
+    mode = "PROD";
 }
 
-app.use(express.static('webapp'));
+function wwwRedirect(req, res, next) {
+    if (req.hostname.slice(0, 4) === 'www.') {
+        var newHost = req.hostname.slice(4);
+        return res.redirect(301, req.protocol + '://' + newHost + req.originalUrl);
+    }
+    next();
+};
+
+app.use(compress());
+app.set('trust proxy', true);
+app.use(wwwRedirect);
+app.use(express.static('webapp', {
+    maxAge: maxAge
+}));
+app.disable('x-powered-by');
 
 function getAPIKey() {
     var date = new moment().add(timeOffset, 'h').format("YYYYMMDDHH");

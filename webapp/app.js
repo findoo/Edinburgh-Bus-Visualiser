@@ -2,13 +2,6 @@ var myApp = angular.module('tracker', ['angularMoment', 'angular-md5']);
 
 myApp.controller('trackerController', function ($scope, $http, moment, md5) {
 
-    $scope.mode = "DEV";
-    if ($scope.mode === "DEV") {
-        $scope.baseUrl = "http://localhost:8000";
-    } else {
-        $scope.baseUrl = "http://finlaysmith.co.uk";
-    }
-
     var map,
         icons = {
             bus: 'images/busicon.png',
@@ -36,7 +29,7 @@ myApp.controller('trackerController', function ($scope, $http, moment, md5) {
     }
 
     function getServices() {
-        $http.get($scope.baseUrl + '/getServices')
+        $http.get('/getServices')
             .then(function (response) {
                 $scope.services = response.data.services;
                 $scope.services.unshift({
@@ -47,7 +40,7 @@ myApp.controller('trackerController', function ($scope, $http, moment, md5) {
     }
 
     function getBusStops() {
-        $http.get($scope.baseUrl + '/getBusStops')
+        $http.get('/getBusStops')
             .then(function (response) {
                 $scope.stops = response.data.busStops;
             });
@@ -84,7 +77,7 @@ myApp.controller('trackerController', function ($scope, $http, moment, md5) {
     function getBusesByService(service) {
         cleanMapAndRemoveMarkers();
 
-        $http.get($scope.baseUrl + '/getBuses/' + service)
+        $http.get('/getBuses/' + service)
             .then(function (response) {
                 $scope.buses = response.data;
 
@@ -114,8 +107,7 @@ myApp.controller('trackerController', function ($scope, $http, moment, md5) {
                                 ", Service: " + marker.mnemoService +
                                 "</h3><ul>";
                             if (element.nextStop !== "") {
-                                $http.get($scope.baseUrl +
-                                        '/getRoute/' + element.busId +
+                                $http.get('/getRoute/' + element.busId +
                                         '/' + element.journeyId +
                                         '/' + element.nextStop)
                                     .then(function (response) {
