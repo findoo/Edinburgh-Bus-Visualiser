@@ -78,15 +78,15 @@ myApp.controller('trackerController', ['$scope', '$http', function ($scope, $htt
                                 bus.mnemoService
                         });
 
-                        var content = "<div style=\"width:250px; max-height:172px; overflow:auto;\"><h3>Bus: " + bus.busId +
-                            ", Service: " + bus.mnemoService +
-                            "</h3>";
                         marker.addListener('click', function () {
                             cleanMap();
                             $scope.selectedMarker = marker;
 
-                            if (bus.nextStop !== "") {
+                            var content = "<div style=\"width:250px; max-height:172px; overflow:auto;\"><h3>Bus: " + bus.busId +
+                                ", Service: " + bus.mnemoService +
+                                "</h3>";
 
+                            if (bus.nextStop !== "") {
                                 $scope.selectedMarker.infoWindow = new google.maps.InfoWindow({
                                     content: content + "<h4>Fetching Route...</h4>"
                                 });
@@ -95,49 +95,53 @@ myApp.controller('trackerController', ['$scope', '$http', function ($scope, $htt
                                         '/' + bus.journeyId +
                                         '/' + bus.nextStop)
                                     .then(function (response) {
-                                        var route = [{
-                                            lat: bus.lat,
-                                            lng: bus.lon
-                                        }];
+                                        if (response.data.journeyTimes[0] !== undefined) {
+                                            var route = [{
+                                                lat: bus.lat,
+                                                lng: bus.lon
+                                            }];
 
-                                        content += "<ul>";
-                                        response.data.journeyTimes[0].journeyTimeDatas.forEach(function (upcomingStop) {
-                                            $scope.stops.filter(function (st) {
-                                                return st.stopId === upcomingStop.stopId;
-                                            }).forEach(function (nextOnRoute) {
-                                                route.push({
-                                                    lat: nextOnRoute.x,
-                                                    lng: nextOnRoute.y
+                                            content += "<ul>";
+                                            response.data.journeyTimes[0].journeyTimeDatas.forEach(function (upcomingStop) {
+                                                $scope.stops.filter(function (st) {
+                                                    return st.stopId === upcomingStop.stopId;
+                                                }).forEach(function (nextOnRoute) {
+                                                    route.push({
+                                                        lat: nextOnRoute.x,
+                                                        lng: nextOnRoute.y
+                                                    });
+                                                    content += "<li>" + upcomingStop.stopName + ": " + upcomingStop.time;
                                                 });
-                                                content += "<li>" + upcomingStop.stopName + ": " + upcomingStop.time;
                                             });
-                                        });
-                                        content += "</ul>";
+                                            content += "</ul>";
 
-                                        var lineSymbol = {
-                                            path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW
-                                        };
-                                        $scope.drawnRoute = new google.maps.Polyline({
-                                            path: route,
-                                            geodesic: true,
-                                            strokeColor: '#FF0000',
-                                            strokeOpacity: 1.0,
-                                            strokeWeight: 2,
-                                            icons: [{
-                                                icon: lineSymbol,
-                                                offset: '100%'
+                                            var lineSymbol = {
+                                                path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW
+                                            };
+                                            $scope.drawnRoute = new google.maps.Polyline({
+                                                path: route,
+                                                geodesic: true,
+                                                strokeColor: '#FF0000',
+                                                strokeOpacity: 1.0,
+                                                strokeWeight: 2,
+                                                icons: [{
+                                                    icon: lineSymbol,
+                                                    offset: '100%'
                                             }, {
-                                                icon: lineSymbol,
-                                                offset: '75%'
+                                                    icon: lineSymbol,
+                                                    offset: '75%'
                                             }, {
-                                                icon: lineSymbol,
-                                                offset: '50%'
+                                                    icon: lineSymbol,
+                                                    offset: '50%'
                                             }, {
-                                                icon: lineSymbol,
-                                                offset: '25%'
+                                                    icon: lineSymbol,
+                                                    offset: '25%'
                                             }],
-                                            map: map
-                                        });
+                                                map: map
+                                            });
+                                        } else {
+                                            content += "Problem fetching vehicle's route. Try again later.";
+                                        }
 
                                         $scope.selectedMarker.infoWindow.close();
                                         $scope.selectedMarker.infoWindow = new google.maps.InfoWindow({

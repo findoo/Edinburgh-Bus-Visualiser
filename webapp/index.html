@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html ng-app="tracker" lang="en">
+<html data-ng-app="tracker" lang="en">
 
 <head>
     <title>Edinburgh Transport Visualiser</title>
@@ -9,7 +9,6 @@
     <meta name="description" content="A graphical visualisation of Edinburgh's bus and tram services, using Lothian Buses API." />
     <meta name="keywords" content="Edinburgh,Bus,Visualisation,Finlay Smith,Lothian Buses,Open Transport,Bus Tracking" />
     <meta name="author" content="Finlay Smith" />
-    <meta http-equiv="Content-Language" content="en-gb" />
     <meta name="Language" content="en-gb" />
     <meta charset="UTF-8" />
 
@@ -26,7 +25,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css" />
 </head>
 
-<body ng-controller="trackerController">
+<body data-ng-controller="trackerController">
     <div id="container">
         <nav class="navbar navbar-default navbar-fixed-top">
             <div class="navbar-header">
@@ -40,17 +39,20 @@
                 <form id="form" name="form" class="navbar-form navbar-left">
                     <ul class="nav navbar-nav">
                         <li class="liBuffer">
-                            <label for="form:selection" class="col-xs-4 col-md-4 control-label">
+                            <label for="selection" class="col-xs-4 col-md-4 control-label">
                                 Filter</label>
                             <div class="col-xs-6 col-md-4">
-                                <select ng-model="dropdownSelected" class="form-control" size="1" ng-options="service.ref as service.mnemo for service in services">
+                                <select id="selection" data-ng-model="dropdownSelected" class="form-control" size="1" data-ng-options="service.ref as service.mnemo for service in services">
                                 </select>
                             </div>
                         </li>
                         <li>
                             <div class="col-xs-6 col-md-4">
-                                <button ng-click="refresh()" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only btn btn-primary btn-sm liBtnBuffer" type="submit"><span class="ui-button-text ui-c">Update</span></button>
+                                <button data-ng-click="refresh()" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only btn btn-primary btn-sm liBtnBuffer" type="submit"><span class="ui-button-text ui-c">Update</span></button>
                             </div>
+                        </li>
+                        <li class="liBuffer">
+                            Showing <span data-ng-bind="busMarkers.length"></span> vehicles
                         </li>
                     </ul>
                 </form>
