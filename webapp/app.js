@@ -1,28 +1,11 @@
-var myApp = angular.module('tracker', ['angularMoment', 'angular-md5']);
+var myApp = angular.module('tracker', []);
 
-myApp.controller('trackerController', function ($scope, $http, moment, md5) {
-
-    var map,
-        icons = {
-            bus: 'images/busicon.png',
-            night: 'images/nighticon.png',
-            tram: 'images/tramicon.png'
-        };
-
-    function initMap() {
-        map = new google.maps.Map(document.getElementById('gmap'), {
-            center: {
-                lat: 55.961776,
-                lng: -3.201612
-            },
-            scrollwheel: true,
-            zoom: 12
-        });
-
-        getServices();
-        getBusesByService("All");
-        getBusStops();
-    }
+myApp.controller('trackerController', ['$scope', '$http', function ($scope, $http) {
+    var icons = {
+        bus: 'images/busicon.png',
+        night: 'images/nighticon.png',
+        tram: 'images/tramicon.png'
+    };
 
     function isNumeric(n) {
         return !isNaN(parseFloat(n)) && isFinite(n);
@@ -81,59 +64,55 @@ myApp.controller('trackerController', function ($scope, $http, moment, md5) {
             .then(function (response) {
                 $scope.buses = response.data;
 
-                $scope.buses.forEach(function (element) {
-                    if (isNumeric(element.lat) && isNumeric(element.lon)) {
+                $scope.buses.forEach(function (bus) {
+                    if (isNumeric(bus.lat) && isNumeric(bus.lon)) {
                         var marker = new google.maps.Marker({
                             position: {
-                                lat: element.lat,
-                                lng: element.lon
+                                lat: bus.lat,
+                                lng: bus.lon
                             },
                             map: map,
-                            icon: icons[element.type],
-                            title: 'Id: ' + element.busId +
+                            icon: icons[bus.type],
+                            title: 'Id: ' + bus.busId +
                                 '; Service: ' +
-                                element.mnemoService,
-                            mnemoService: element.mnemoService,
-                            busId: element.busId
+                                bus.mnemoService
                         });
 
-                        // Marker selected listener - close existing info windows, open new one, fetch route polyline.
+                        var content = "<div style=\"width:250px; max-height:172px; overflow:auto;\"><h3>Bus: " + bus.busId +
+                            ", Service: " + bus.mnemoService +
+                            "</h3>";
                         marker.addListener('click', function () {
                             cleanMap();
-
                             $scope.selectedMarker = marker;
 
-                            var content = "<div style=\"width:250px; max-height:172px; overflow:auto;\"><h3>Bus: " + marker.busId +
-                                ", Service: " + marker.mnemoService +
-                                "</h3><ul>";
-                            if (element.nextStop !== "") {
-                                $http.get('/getRoute/' + element.busId +
-                                        '/' + element.journeyId +
-                                        '/' + element.nextStop)
+                            if (bus.nextStop !== "") {
+
+                                $scope.selectedMarker.infoWindow = new google.maps.InfoWindow({
+                                    content: content + "<h4>Fetching Route...</h4>"
+                                });
+                                $scope.selectedMarker.infoWindow.open(map, marker);
+                                $http.get('/getRoute/' + bus.busId +
+                                        '/' + bus.journeyId +
+                                        '/' + bus.nextStop)
                                     .then(function (response) {
                                         var route = [{
-                                            lat: element.lat,
-                                            lng: element.lon
+                                            lat: bus.lat,
+                                            lng: bus.lon
                                         }];
 
-                                        response.data.journeyTimes[0].journeyTimeDatas.forEach(function (stop) {
-                                            content += "<li>" + stop.stopName + ": " + stop.time;
-
-                                            $scope.stops.forEach(function (cachedStop) {
-                                                if (cachedStop.stopId === stop.stopId) {
-                                                    route.push({
-                                                        lat: cachedStop.x,
-                                                        lng: cachedStop.y
-                                                    });
-                                                }
+                                        content += "<ul>";
+                                        response.data.journeyTimes[0].journeyTimeDatas.forEach(function (upcomingStop) {
+                                            $scope.stops.filter(function (st) {
+                                                return st.stopId === upcomingStop.stopId;
+                                            }).forEach(function (nextOnRoute) {
+                                                route.push({
+                                                    lat: nextOnRoute.x,
+                                                    lng: nextOnRoute.y
+                                                });
+                                                content += "<li>" + upcomingStop.stopName + ": " + upcomingStop.time;
                                             });
                                         });
                                         content += "</ul>";
-
-                                        $scope.selectedMarker.infoWindow = new google.maps.InfoWindow({
-                                            content: content
-                                        });
-                                        $scope.selectedMarker.infoWindow.open(map, marker);
 
                                         var lineSymbol = {
                                             path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW
@@ -159,12 +138,19 @@ myApp.controller('trackerController', function ($scope, $http, moment, md5) {
                                             }],
                                             map: map
                                         });
+
+                                        $scope.selectedMarker.infoWindow.close();
+                                        $scope.selectedMarker.infoWindow = new google.maps.InfoWindow({
+                                            content: content
+                                        });
+                                        $scope.selectedMarker.infoWindow.open(map, marker);
                                     });
                             } else {
+                                content = "<h3>Bus: " + bus.busId +
+                                    "</h3><h4>Not in service</h4>";
+
                                 $scope.selectedMarker.infoWindow = new google.maps.InfoWindow({
-                                    content: "<h3>Bus: " + marker.busId +
-                                        ", Service: " + marker.mnemoService +
-                                        "</h3>Not in service"
+                                    content: content
                                 });
                                 $scope.selectedMarker.infoWindow.open(map, marker);
                             }
@@ -177,10 +163,20 @@ myApp.controller('trackerController', function ($scope, $http, moment, md5) {
     }
 
     $scope.dropdownSelected = "All";
-    $scope.showStops = false;
     $scope.refresh = function () {
         getBusesByService($scope.dropdownSelected);
     };
 
-    initMap();
-});
+    var map = new google.maps.Map(document.getElementById('gmap'), {
+        center: {
+            lat: 55.961776,
+            lng: -3.201612
+        },
+        scrollwheel: true,
+        zoom: 12
+    });
+
+    getServices();
+    getBusesByService("All");
+    getBusStops();
+}]);
