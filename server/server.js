@@ -8,6 +8,10 @@ var zlib = require("zlib");
 var csv = require("csv");
 var bngconvert = require("bngconvert");
 
+process.on('uncaughtException', function (error) {
+    console.log(error.stack);
+});
+
 var app = express();
 
 var timeOffset = 0,
@@ -22,9 +26,11 @@ if (process.argv[2] != undefined && process.argv[2] == "PROD") {
 }
 
 function wwwRedirect(req, res, next) {
-    if (req.hostname.slice(0, 4) === 'www.') {
-        var newHost = req.hostname.slice(4);
-        return res.redirect(301, req.protocol + '://' + newHost + req.originalUrl);
+    if (req !== undefined && req.hostname !== undefined) {
+        if (req.hostname.slice(0, 4) === 'www.') {
+            var newHost = req.hostname.slice(4);
+            return res.redirect(301, req.protocol + '://' + newHost + req.originalUrl);
+        }
     }
     next();
 };
