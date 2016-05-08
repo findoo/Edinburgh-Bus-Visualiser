@@ -12,39 +12,17 @@ process.on('uncaughtException', function (error) {
     console.log(error.stack);
 });
 
-var app = express();
+var app = express(),
+port = 8000,
+maxAge = 2629746000;
 
-var timeOffset = 0,
-    port = 8000,
-    maxAge = 0,
-    mode = "DEV";
-if (process.argv[2] != undefined && process.argv[2] == "PROD") {
-    timeOffset = 5;
-    port = 80;
-    maxAge = 2629746000;
-    mode = "PROD";
-}
-
-function wwwRedirect(req, res, next) {
-    if (req !== undefined && req.hostname !== undefined) {
-        if (req.hostname.slice(0, 4) === 'www.') {
-            var newHost = req.hostname.slice(4);
-            return res.redirect(301, req.protocol + '://' + newHost + req.originalUrl);
-        }
-    }
-    next();
-};
-
-app.use(compress());
-app.set('trust proxy', true);
-app.use(wwwRedirect);
 app.use(express.static('webapp', {
     maxAge: maxAge
 }));
 app.disable('x-powered-by');
 
 function getAPIKey() {
-    var date = new moment().add(timeOffset, 'h').format("YYYYMMDDHH");
+    var date = new moment().format("YYYYMMDDHH");
     var key = crypto.createHash('md5').update("2E7S4J8WN5MK1DKPCK28YK56C" + date).digest("hex");
     return key;
 }
@@ -167,6 +145,6 @@ app.get('/getRoute/:busId/:journeyId/:nextStop', function (req, res) {
 });
 
 var server = app.listen(port, function () {
-    console.log("Server running in mode: " + mode);
+    console.log("Server running");
 });
 module.exports = server;

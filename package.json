@@ -5,12 +5,12 @@
   "main": "./app/server.js",
   "scripts": {
     "test": "mocha test",
-    "start": "node ./server/server.js PROD"
+    "start": "node ./server/server.js"
   },
   "author": "Finlay Smith",
   "license": "ISC",
   "dependencies": {
-    "bngconvert": "^0.0.1",
+    "bngconvert": "^0.0.2",
     "chai": "^3.4.1",
     "chai-http": "^1.0.0",
     "compression": "^1.6.0",
