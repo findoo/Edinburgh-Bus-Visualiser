@@ -13,7 +13,7 @@ process.on('uncaughtException', function (error) {
 });
 
 var app = express(),
-port = 8000,
+port = (process.env.PORT || 8000),
 maxAge = 2629746000;
 
 app.use(express.static('webapp', {
