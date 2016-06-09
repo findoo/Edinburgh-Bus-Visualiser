@@ -93,9 +93,12 @@ app.get('/getServices', function (req, res) {
         url: "http://ws.mybustracker.co.uk/?module=json&key=" + getAPIKey() + "&function=getServices",
         json: true
     }, function (error, response, body) {
-        if (!error && response.statusCode === 200) {
+        if (!error) {
             res.setHeader('Content-Type', 'application/json');
             res.send(JSON.stringify(body));
+        } else {
+            console.log(error);
+            res.send("Error fetching services");
         }
     });
 });
@@ -107,7 +110,7 @@ app.get('/getBuses/:service', function (req, res) {
             var returnData = busLocationParsing(data, req.params.service);
             res.send(returnData);
         } else {
-            console.log(err);
+            console.log(error);
             res.send("Error fetching bus GPS");
         }
     });
