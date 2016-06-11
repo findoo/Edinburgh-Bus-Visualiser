@@ -8,9 +8,10 @@ var zlib = require("zlib");
 var csv = require("csv");
 var bngconvert = require("bngconvert");
 
-process.on('uncaughtException', function (error) {
-    console.log(error.stack);
-});
+process.on('uncaughtException', function (err) {
+  console.error(err.stack)
+  process.exit(1)
+})
 
 var app = express(),
 port = (process.env.PORT || 8000),
