@@ -9,7 +9,8 @@ module.exports = function (grunt) {
                 src: ['./server/server.js', './webapp/app.js']
             },
             options: {
-                force: true
+                force: true,
+                esversion: 6
             },
         },
 

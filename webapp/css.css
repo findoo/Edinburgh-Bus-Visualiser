@@ -8,16 +8,15 @@ html {
 }
 
 select {
-  margin-top: -3px; !important
+  margin-top: -3px !important;
 }
-
-
 
 #gmap {
     display: block;
     position: absolute;
     height: 100%;
-    weight: 100% bottom: 0;
+    width: 100%;
+    bottom: 0;
     top: 0;
     left: 0;
     right: 0;
