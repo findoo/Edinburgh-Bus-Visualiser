@@ -39,22 +39,27 @@
 				<form id="form" name="form" class="navbar-form navbar-left">
 					<ul class="nav navbar-nav">
 						<li class="liBuffer">
-							<label for="selection" class="col-md-4 control-label hidden-xs">
-                                Filter</label>
+							<label for="selection" class="col-xs-3 col-md-4 control-label">
+                                Service</label>
 							<div class="col-xs-9 col-md-4">
 								<select id="selection" data-ng-model="dropdownSelected" class="form-control" size="1" data-ng-options="service.ref as service.mnemo for service in services"
-									data-ng-change="refresh()">
+									data-ng-change="refresh()" ng-disabled="busId">
                                 </select>
 							</div>
 						</li>
-						<li>
-							<div class="col-xs-3 col-md-4">
-								<button data-ng-click="refresh()" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only btn btn-primary btn-sm liBtnBuffer"
-									type="submit"><span class="ui-button-text ui-c">Update</span></button>
+						<li class="liBuffer">
+							<label for="fleet" class="col-xs-3 col-md-6 control-label">
+                                Fleet number</label>
+							<div class="col-xs-9 col-md-4">
+								<input id="fleet" type="text" class="form-control" ng-model="busId" data-ng-change="refresh()"/>
 							</div>
 						</li>
-						<li class="liBuffer hidden-xs">
-							Showing <span data-ng-bind="busMarkers.length"></span> vehicles
+						<li>
+							<div class="col-xs-12 col-md-12">
+								<button data-ng-click="refresh()" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only btn btn-primary btn-sm liBtnBuffer"
+									type="submit"><span class="ui-button-text ui-c">Update</span></button>
+									&nbsp;&nbsp;&nbsp;&nbsp;Showing <span data-ng-bind="busMarkers.length"></span> vehicle/s
+							</div>
 						</li>
 					</ul>
 				</form>

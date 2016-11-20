@@ -43,7 +43,7 @@ String.prototype.replaceAll = function (t, r) {
     return this.split(t).join(r);
 };
 
-function busLocationParsing(input, service) {
+function busLocationParsing(input, service, id) {
     var lines = input.split("\n"),
         result = [],
         headers = lines[0].split(",");
@@ -73,10 +73,16 @@ function busLocationParsing(input, service) {
         vehicle.lat = coordinates[0];
         vehicle.lon = coordinates[1];
 
-        if (service === "All") {
-            result.push(vehicle);
-        } else if (vehicle.refService === service) {
-            result.push(vehicle);
+        if(service) {
+            if (service === "All") {
+                result.push(vehicle);
+            } else if (vehicle.refService === service) {
+                result.push(vehicle);
+            }
+        }
+
+        if(id && vehicle.busId === id) {
+            return JSON.stringify([vehicle]);
         }
     }
     return JSON.stringify(result);
@@ -119,7 +125,21 @@ app.get('/getBuses/:service', (req, res) => {
         (error, data) => {
             if (!error) {
                 res.setHeader('Content-Type', 'application/json');
-                var returnData = busLocationParsing(data, req.params.service);
+                var returnData = busLocationParsing(data, req.params.service, undefined);
+                res.send(returnData);
+            } else {
+                winston.log('error', 'Error fetching getBuses', error);
+                res.send("Error fetching bus GPS");
+            }
+        });
+});
+
+app.get('/getBus/:id', (req, res) => {
+    getGzipped("http://ws.mybustracker.co.uk/?module=csv&key=" + getAPIKey() + "&function=getVehicleLocations",
+        (error, data) => {
+            if (!error) {
+                res.setHeader('Content-Type', 'application/json');
+                var returnData = busLocationParsing(data, undefined, req.params.id);
                 res.send(returnData);
             } else {
                 winston.log('error', 'Error fetching getBuses', error);
