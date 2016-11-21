@@ -96,12 +96,12 @@ function getGzipped(url, callback) {
         gunzip.on('data', (data) => {
             buffer.push(data.toString());
         }).on("end", () => {
-            callback(null, buffer.join(""));
+            return callback(null, buffer.join(""));
         }).on("error", (e) => {
-            callback(e);
+            return callback(e);
         });
     }).on('error', (e) => {
-        callback(e);
+        return callback(e);
     });
 }
 
