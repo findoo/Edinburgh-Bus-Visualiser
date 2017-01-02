@@ -47,6 +47,19 @@ function busLocationParsing(input, service, id) {
     var lines = input.split("\n"),
         result = [],
         headers = lines[0].split(",");
+
+    var minId = id;
+    var maxId = id;
+    if(id) {
+        var split = id.replace(/\s+/g, '')
+                .split('-')
+                .map(str => parseInt(str));
+        if(split.length > 1) {
+            minId = split[0];
+            maxId = split[1];
+        }
+    }
+    
     for (var i = 1; i < lines.length; i++) {
         var vehicle = {},
             currentline = lines[i].split(",");
@@ -57,6 +70,7 @@ function busLocationParsing(input, service, id) {
                 vehicle[head] = content;
             }
         }
+        vehicle["busId"] = parseInt(vehicle.busId);
 
         switch (vehicle.mnemoService === undefined ? '' : vehicle.mnemoService.substr(0, 1)) {
         case "N":
@@ -81,8 +95,8 @@ function busLocationParsing(input, service, id) {
             }
         }
 
-        if(id && vehicle.busId === id) {
-            return JSON.stringify([vehicle]);
+        if(id && (vehicle.busId >= minId && vehicle.busId <= maxId)) {
+            result.push(vehicle);
         }
     }
     return JSON.stringify(result);
