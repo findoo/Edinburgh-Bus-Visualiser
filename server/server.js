@@ -12,85 +12,84 @@ var zlib = require("zlib");
 var app = express(),
     port = (process.env.PORT || 8000);
 
-app.use(compression());
-http.globalAgent.maxSockets = Infinity;
-
-function haltOnTimedout(req, res, next){
-    if (!req.timedout) next();
-}
-
 function getAPIKey() {
     var date = moment().format("YYYYMMDDHH");
     return crypto.createHash("md5").update("2E7S4J8WN5MK1DKPCK28YK56C" + date).digest("hex");
 }
 
 function busLocationParsing(input, service, id, res) {
-    res.write("[");
+    var outputArray = [],
+        lines = input.split("\n"),
+        headers = lines[0].split(",");
 
-    var lines = input.split("\n"),
-        headers = lines[0].split(","),
-        written = 0;
-
-    var minId = id;
-    var maxId = id;
+    // fleet ID filtering limits (allows entering range of X - Y)
+    var minFleetId = id;
+    var maxFleetId = id;
     if (id) {
         var split = id.replace(/\s+/g, "")
             .split("-")
             .map(str => parseInt(str));
         if (split.length > 1) {
-            minId = split[0];
-            maxId = split[1];
+            minFleetId = split[0];
+            maxFleetId = split[1];
         }
     }
 
-    if (lines.length > 0) {
+    // parse the raw CSV into Object
+    if (lines.length > 1) {
         for (var i = 1; i < lines.length; i++) {
-            var vehicle = {},
-                currentline = lines[i].split(",");
-            for (var j = 0; j < headers.length; j++) {
-                if (currentline[j]) {
-                    var head = replaceall("\"", "", headers[j]),
-                        content = replaceall("\"", "", currentline[j]);
-                    vehicle[head] = content;
-                }
-            }
-            vehicle.busId = parseInt(vehicle.busId);
-
-            switch (vehicle.mnemoService === undefined ? "" : vehicle.mnemoService.substr(0, 1)) {
-            case "N":
-                vehicle.type = "night";
-                break;
-            case "T":
-                vehicle.type = "tram";
-                break;
-            default:
-                if (vehicle.busId >= 251 && vehicle.busId <= 277) {
-                    vehicle.type = "tram";
-                } else {
-                    vehicle.type = "bus";
-                }
-            }
-
-            var coordinates = bngconvert.OSGB36toWGS84(vehicle.x, vehicle.y);
-            vehicle.lat = coordinates[0];
-            vehicle.lon = coordinates[1];
+            var vehicle = getVehicle(lines[i], headers);
 
             if (service) {
-                if (service === "All") {
-                    res.write((written > 0 ? ',' : '') + JSON.stringify(vehicle));
-                    written++;
-                } else if (vehicle.refService === service) {
-                    res.write((written > 0 ? ',' : '') + JSON.stringify(vehicle));
-                    written++;
+                if (service === "All" || vehicle.refService === service) {
+                    outputArray.push(vehicle);
                 }
-            } else if (id && (vehicle.busId >= minId && vehicle.busId <= maxId)) {
-                res.write((written > 0 ? ',' : '') + JSON.stringify(vehicle));
-                written++;
+            } else if (id && (vehicle.busId >= minFleetId && vehicle.busId <= maxFleetId)) {
+                outputArray.push(vehicle);
             }
         }
     }
-    res.write(']');
+    res.write(JSON.stringify(outputArray));
     res.end();
+}
+
+function getVehicle(line, headers) {
+    var vehicle = {},
+        currentLine = line.split(",");
+    for (var i = 0; i < headers.length; i++) {
+        if (currentLine[i]) {
+            var head = replaceall("\"", "", headers[i]),
+                content = replaceall("\"", "", currentLine[i]);
+            vehicle[head] = content;
+        }
+    }
+
+    return cleanUpVehicleData(vehicle);
+}
+
+function cleanUpVehicleData(vehicle) {
+    vehicle.busId = parseInt(vehicle.busId);
+    vehicle.type = getType(vehicle);
+
+    var coordinates = bngconvert.OSGB36toWGS84(vehicle.x, vehicle.y);
+    vehicle.lat = coordinates[0];
+    vehicle.lon = coordinates[1];
+    return vehicle;
+}
+
+function getType(vehicle) {
+    switch (vehicle.mnemoService === undefined ? "" : vehicle.mnemoService.substr(0, 1)) {
+    case "N":
+        return "night";
+    case "T":
+        return "tram";
+    default:
+        if (vehicle.busId >= 251 && vehicle.busId <= 277) {
+            return "tram";
+        } else {
+            return "bus";
+        }
+    }
 }
 
 function getGzipped(url, callback) {
@@ -179,12 +178,15 @@ app.get("/getRoute/:busId/:journeyId/:nextStop", function (req, res) {
     });
 });
 
+http.globalAgent.maxSockets = Infinity;
+
+app.use(compression());
 app.use(express.static("webapp"));
-
 app.use(timeout(120000));
-app.use(haltOnTimedout);
-
-var server = app.listen(port, () => {
-    console.log("Server running");
+app.use((req, res, next) => {
+    if (!req.timedout) next();
 });
-module.exports = server;
+
+module.exports = app.listen(port, () => {
+    console.log("Server running on port - " + port);
+});
