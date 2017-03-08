@@ -1,6 +1,6 @@
 {
   "name": "edinburghvisualiser",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A visualisation of Edinburgh's bus and tram network",
   "main": "./app/server.js",
   "scripts": {
@@ -15,18 +15,18 @@
     "chai-http": "3.0.0",
     "compression": "1.6.2",
     "connect-timeout": "^1.8.0",
-    "express": "4.14.0",
+    "express": "4.15.2",
     "express-subdomain": "1.0.5",
     "grunt": "1.0.1",
     "matchdep": "1.0.1",
     "mocha": "3.2.0",
     "moment": "2.17.1",
     "replaceall": "^0.1.6",
-    "request": "2.79.0"
+    "request": "2.80.0"
   },
   "devDependencies": {
     "css-condense": "0.1.1",
-    "grunt-contrib-cssmin": "1.0.2",
+    "grunt-contrib-cssmin": "2.0.0",
     "grunt-contrib-jshint": "1.1.0",
     "grunt-htmlhint": "0.9.13"
   }
