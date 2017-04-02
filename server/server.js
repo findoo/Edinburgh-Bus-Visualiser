@@ -14,7 +14,7 @@ var app = express(),
 
 function getAPIKey() {
     var date = moment().format("YYYYMMDDHH");
-    return crypto.createHash("md5").update("2E7S4J8WN5MK1DKPCK28YK56C" + date).digest("hex");
+    return crypto.createHash("md5").update("2E7S4J8WN5MK1DKPCK28YK56C".concat(date)).digest("hex");
 }
 
 function busLocationParsing(input, service, id, res) {
@@ -118,6 +118,7 @@ app.get("/getServices", function (req, res) {
         if (!error) {
             res.json(body);
         } else {
+            console.error(error);
             res.status(500).end();
         }
     });
@@ -130,7 +131,8 @@ app.get("/getBuses/:service", function (req, res) {
                 res.setHeader("Content-Type", "application/json");
                 busLocationParsing(data, req.params.service, undefined, res);
             } else {
-                res.status(500).end();
+                console.error(error);
+                res.status(500).send(error);
             }
         });
 });
@@ -142,7 +144,8 @@ app.get("/getBus/:id", function (req, res) {
                 res.setHeader("Content-Type", "application/json");
                 busLocationParsing(data, undefined, req.params.id, res);
             } else {
-                res.status(500).end();
+                console.error(error);
+                res.status(500).send(error);
             }
         });
 });
@@ -155,7 +158,8 @@ app.get("/getBusStops", function (req, res) {
         if (!error) {
             res.json(body);
         } else {
-            res.status(500).end();
+            console.error(error);
+            res.status(500).send(error);
         }
     });
 });
@@ -173,7 +177,8 @@ app.get("/getRoute/:busId/:journeyId/:nextStop", function (req, res) {
             res.setHeader("Content-Type", "application/json");
             res.json(body);
         } else {
-            res.status(500).end();
+            console.error(error);
+            res.status(500).send(error);
         }
     });
 });
@@ -183,9 +188,14 @@ http.globalAgent.maxSockets = Infinity;
 app.use(compression());
 app.use(express.static("webapp"));
 app.use(timeout(120000));
-app.use((req, res, next) => {
-    if (!req.timedout) next();
+app.use((err, req, res, next) => {
+    if (req.timedout) {
+        console.error(req + ' timed out');
+    }
+    next();
 });
+
+console.error("Test message");
 
 module.exports = app.listen(port, () => {
     console.log("Server running on port - " + port);
