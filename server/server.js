@@ -116,6 +116,8 @@ app.get("/getServices", function (req, res) {
         json: true
     }, (error, response, body) => {
         if (!error) {
+            res.set("Connection", "close");
+            res.setHeader("Content-Type", "application/json");
             res.json(body);
         } else {
             console.error(error);
@@ -125,9 +127,11 @@ app.get("/getServices", function (req, res) {
 });
 
 app.get("/getBuses/:service", function (req, res) {
+    console.log(moment().format() + ' - get buses - ' + req.params.service);
     getGzipped("http://ws.mybustracker.co.uk/?module=csv&key=" + getAPIKey() + "&function=getVehicleLocations",
         (error, data) => {
             if (!error) {
+                res.set("Connection", "close");
                 res.setHeader("Content-Type", "application/json");
                 busLocationParsing(data, req.params.service, undefined, res);
             } else {
@@ -138,9 +142,11 @@ app.get("/getBuses/:service", function (req, res) {
 });
 
 app.get("/getBus/:id", function (req, res) {
+    console.log(moment().format() + ' - get bus - ' + req.params.id);
     getGzipped("http://ws.mybustracker.co.uk/?module=csv&key=" + getAPIKey() + "&function=getVehicleLocations",
         (error, data) => {
             if (!error) {
+                res.set("Connection", "close");
                 res.setHeader("Content-Type", "application/json");
                 busLocationParsing(data, undefined, req.params.id, res);
             } else {
@@ -156,6 +162,8 @@ app.get("/getBusStops", function (req, res) {
         json: true
     }, (error, response, body) => {
         if (!error) {
+            res.set("Connection", "close");
+            res.setHeader("Content-Type", "application/json");
             res.json(body);
         } else {
             console.error(error);
@@ -165,6 +173,7 @@ app.get("/getBusStops", function (req, res) {
 });
 
 app.get("/getRoute/:busId/:journeyId/:nextStop", function (req, res) {
+    console.log(moment().format() + ' - get route - ' + req.params.busId);
     var par = req.params;
     request({
         url: "http://ws.mybustracker.co.uk/?module=json&key=" + getAPIKey() +
@@ -174,6 +183,7 @@ app.get("/getRoute/:busId/:journeyId/:nextStop", function (req, res) {
         json: true
     }, (error, response, body) => {
         if (!error) {
+            res.set("Connection", "close");
             res.setHeader("Content-Type", "application/json");
             res.json(body);
         } else {
@@ -194,8 +204,6 @@ app.use((err, req, res, next) => {
     }
     next();
 });
-
-console.error("Test message");
 
 module.exports = app.listen(port, () => {
     console.log("Server running on port - " + port);
