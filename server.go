@@ -13,8 +13,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
 	osgb "github.com/fofanov/go-osgb"
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
@@ -60,7 +60,8 @@ func main() {
 
 	log.Println("Listening...")
 	log.Println(getAPIKey())
-	http.ListenAndServe(":3000", router)
+	gzip := handlers.CompressHandler(router)
+	http.ListenAndServe(":3000", gzip)
 }
 
 func getAPIKey() (key string) {
