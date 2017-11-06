@@ -47,6 +47,11 @@ select {
     margin-left: 30px;
 }
 
+.liBtnBuffer:nth-of-type(n+2) {
+    margin-right: 15px;
+    margin-left: 0px;
+}
+
 input { 
     margin-top: -8px !important;
 }

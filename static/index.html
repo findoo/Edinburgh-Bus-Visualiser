@@ -6,21 +6,22 @@
 
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 	<meta name="apple-mobile-web-app-capable" content="yes" />
-	<meta name="description" content="A graphical visualisation of Edinburgh's bus and tram services, using Lothian Buses API." />
+	<meta name="description" content="A graphical visualisation of Edinburgh's bus and tram services, using Lothian Buses API."
+	/>
 	<meta name="keywords" content="Edinburgh,Bus,Visualisation,Finlay Smith,Lothian Buses,Open Transport,Bus Tracking" />
 	<meta name="author" content="Finlay Smith" />
 	<meta name="Language" content="en-gb" />
 	<meta charset="UTF-8" />
 
 	<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"></script>
-	<script src="app.js"></script>
-	<script src="analytics.js"></script>
+	<script src="./static/app.js"></script>
+	<script src="./static/analytics.js"></script>
 	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCNtb1FPR2GbrPU3z8jt_GHqWaOCC32BOo" type="text/javascript"></script>
-	<script src="jquery-2.1.4.min.js"></script>
+	<script src="./static/jquery-2.1.4.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 
 	<link href="http://fonts.googleapis.com/css?family=Lato:400,700" rel="stylesheet" type="text/css" />
-	<link rel="stylesheet" href="css.min.css" />
+	<link rel="stylesheet" href="./static/css.css" />
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" />
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css" />
 </head>
@@ -30,8 +31,11 @@
 		<nav class="navbar navbar-default navbar-fixed-top">
 			<div class="navbar-header">
 				<button type="button" data-target="#navbarCollapse" data-toggle="collapse" class="navbar-toggle">
-                    <span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span>
-                </button>
+					<span class="sr-only">Toggle navigation</span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
 				<a href="#" class="navbar-brand">Edinburgh Transport Visualisation</a>
 			</div>
 
@@ -40,25 +44,36 @@
 					<ul class="nav navbar-nav">
 						<li class="liBuffer">
 							<label for="selection" class="col-xs-3 col-md-4 control-label">
-                                Service</label>
+								Service</label>
 							<div class="col-xs-9 col-md-4">
 								<select id="selection" data-ng-model="dropdownSelected" class="form-control" size="1" data-ng-options="service.ref as service.mnemo for service in services"
-									data-ng-change="refresh()" ng-disabled="busId">
-                                </select>
+								 data-ng-change="refresh()" ng-disabled="busId">
+								</select>
 							</div>
 						</li>
 						<li class="liBuffer">
 							<label for="fleet" class="col-xs-3 col-md-6 control-label">
-                                Fleet number</label>
+								Fleet number</label>
 							<div class="col-xs-9 col-md-4">
-								<input id="fleet" type="text" class="form-control" ng-model="busId" data-ng-change="refresh()"/>
+								<input id="fleet" type="text" class="form-control" ng-model="busId" data-ng-change="refresh()" />
 							</div>
 						</li>
 						<li>
 							<div class="col-xs-12 col-md-12">
 								<button data-ng-click="refresh()" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only btn btn-primary btn-sm liBtnBuffer"
-									type="submit"><span class="ui-button-text ui-c">Update</span></button>
-									&nbsp;&nbsp;&nbsp;&nbsp;Showing <span data-ng-bind="busMarkers.length"></span> vehicle/s
+								 type="submit">
+									<span class="ui-button-text ui-c">Update</span>
+								</button>
+								<button data-ng-click="toggleAuto()" ng-show="auto" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only btn btn-warning btn-sm liBtnBuffer"
+								type="submit">
+								   <span class="ui-button-text ui-c">Turn off auto</span>
+							   </button>
+							   <button data-ng-click="toggleAuto()" ng-show="!auto" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only btn btn-primary btn-sm liBtnBuffer"
+							   type="submit">
+								  <span class="ui-button-text ui-c">Turn on auto</span>
+							  </button>
+								Showing
+								<span data-ng-bind="busMarkers.length"></span> vehicle/s
 							</div>
 						</li>
 					</ul>

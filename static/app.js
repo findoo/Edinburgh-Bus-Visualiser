@@ -1,16 +1,47 @@
 var myApp = angular.module('tracker', []);
 
+const ICONS = {
+    bus: 'static/images/busicon.png',
+    night: 'static/images/nighticon.png',
+    tram: 'static/images/tramicon.png'
+};
+
 myApp.controller('trackerController', ['$scope', '$http', ($scope, $http) => {
-    var icons = {
-        bus: 'images/busicon.png',
-        night: 'images/nighticon.png',
-        tram: 'images/tramicon.png'
-    };
 
     var map;
 
     function isNumeric(n) {
         return !isNaN(parseFloat(n)) && isFinite(n);
+    }
+
+    function initialSetup() {
+        $scope.dropdownSelected = "All";
+        $scope.auto = false;
+
+        $scope.refresh = update;
+
+        $scope.toggleAuto = () => {
+            $scope.auto = !$scope.auto;
+        };
+
+        setInterval(() => { 
+            if($scope.auto) {
+                update();
+            }
+        }, 6000);
+
+        map = new google.maps.Map(document.getElementById('gmap'), {
+            center: {
+                lat: 55.961776,
+                lng: -3.201612
+            },
+            scrollwheel: true,
+            zoom: 12
+        });
+
+        getServices();
+        getBusesByService("All");
+        getBusStops();
     }
 
     function getServices() {
@@ -31,37 +62,14 @@ myApp.controller('trackerController', ['$scope', '$http', ($scope, $http) => {
             });
     }
 
-    function cleanMap() {
-        if ($scope.selectedMarker && $scope.selectedMarker.infoWindow) {
-            $scope.selectedMarker.infoWindow.close();
-        }
-
-        if ($scope.drawnRoute) {
-            $scope.drawnRoute.setMap(null);
-        }
-        $scope.selectedMarker = null;
-        $scope.drawnRoute = null;
-    }
-
-    function cleanMapAndRemoveMarkers() {
-        cleanMap();
-
-        if ($scope.busMarkers) {
-            $scope.busMarkers.forEach((busMarker) => {
-                busMarker.setMap(null);
-            });
-        }
-        $scope.busMarkers = [];
-    }
-
     function getBusesByService(service) {
         $http.get('/getBuses/' + service)
             .then((response) => {
-                cleanMapAndRemoveMarkers();
+                cleanMap(true);
 
                 $scope.buses = response.data;
                 $scope.buses.forEach((bus) => {
-                    if (isNumeric(bus.lat) && isNumeric(bus.lon)) {
+                    if (isNumeric(bus.Lat) && isNumeric(bus.Lon)) {
                         $scope.busMarkers.push(createNewMarker(bus));
                     }
                 });
@@ -71,11 +79,11 @@ myApp.controller('trackerController', ['$scope', '$http', ($scope, $http) => {
     function getSingleBus(id) {
         $http.get('/getBus/' + id)
             .then((response) => {
-                cleanMapAndRemoveMarkers();
+                cleanMap(true);
 
                 $scope.buses = response.data;
                 $scope.buses.forEach((bus) => {
-                    if (isNumeric(bus.lat) && isNumeric(bus.lon)) {
+                    if (isNumeric(bus.Lat) && isNumeric(bus.Lon)) {
                         newMarker = createNewMarker(bus);
                         $scope.busMarkers.push(newMarker);
                         map.setCenter(newMarker.getPosition());
@@ -84,53 +92,20 @@ myApp.controller('trackerController', ['$scope', '$http', ($scope, $http) => {
             });
     }
 
-    function createNewMarker(bus) {
-        var marker = new google.maps.Marker({
-            position: {
-                lat: bus.lat,
-                lng: bus.lon
-            },
-            map: map,
-            icon: icons[bus.type],
-            title:
-            'Fleet num: ' + bus.busId +
-            ', Service: ' +
-            bus.mnemoService
-        });
-
-        marker.addListener('click', () => {
-            cleanMap();
-            $scope.selectedMarker = marker;
-
-            var content = "<div style=\"width:250px; max-height:172px; overflow:auto;\">" +
-                "<h3>Fleet num: " + bus.busId +
-                ", Service: " + bus.mnemoService +
-                "</h3>";
-
-            if (bus.nextStop !== "") {
-                getActiveBusMarkerContent(bus, content, marker);
-            } else {
-                getInactiveBusMarkerContent(bus, marker);
-            }
-        });
-
-        return marker;
-    }
-
-    function getActiveBusMarkerContent(bus, content, marker) {
+    function getActiveBusMarkerContent(content) {
         $scope.selectedMarker.infoWindow = new google.maps.InfoWindow({
             content: content + "<h4>Fetching Route...</h4>"
         });
-        $scope.selectedMarker.infoWindow.open(map, marker);
+        $scope.selectedMarker.infoWindow.open(map, $scope.selectedMarker);
 
-        $http.get('/getRoute/' + bus.busId +
-            '/' + bus.journeyId +
-            '/' + bus.nextStop)
+        $http.get('/getRoute/' + $scope.selectedBus.BusId +
+            '/' + $scope.selectedBus.JourneyId +
+            '/' + $scope.selectedBus.NextStop)
             .then((response) => {
                 if (response.data.journeyTimes[0]) {
                     var route = [{
-                        lat: bus.lat,
-                        lng: bus.lon
+                        lat: $scope.selectedBus.Lat,
+                        lng: $scope.selectedBus.Lon
                     }];
 
                     content += "<ul>";
@@ -155,19 +130,19 @@ myApp.controller('trackerController', ['$scope', '$http', ($scope, $http) => {
                 $scope.selectedMarker.infoWindow = new google.maps.InfoWindow({
                     content: content
                 });
-                $scope.selectedMarker.infoWindow.open(map, marker);
+                $scope.selectedMarker.infoWindow.open(map, $scope.selectedMarker);
             });
     }
 
-    function getInactiveBusMarkerContent(bus, marker) {
+    function getInactiveBusMarkerContent() {
         var content =
-            "<h3>Fleet num: " + bus.busId + "</h3>" +
+            "<h3>Fleet num: " + $scope.selectedBus.BusId + "</h3>" +
             "<h4>Not in service</h4>";
 
         $scope.selectedMarker.infoWindow = new google.maps.InfoWindow({
             content: content
         });
-        $scope.selectedMarker.infoWindow.open(map, marker);
+        $scope.selectedMarker.infoWindow.open(map, $scope.selectedMarker);
     }
 
     function drawRouteOnMap(route) {
@@ -197,29 +172,72 @@ myApp.controller('trackerController', ['$scope', '$http', ($scope, $http) => {
         });
     }
 
-    function initialSetup() {
-        $scope.dropdownSelected = "All";
-        $scope.refresh = () => {
-            if($scope.busId) {
-                getSingleBus($scope.busId);
-            } else {
-                getBusesByService($scope.dropdownSelected);
-            }
-        };
+    function cleanMap(removeMarkers) {
+        if ($scope.selectedMarker && $scope.selectedMarker.infoWindow) {
+            $scope.selectedMarker.infoWindow.close();
+        }
 
-        map = new google.maps.Map(document.getElementById('gmap'), {
-            center: {
-                lat: 55.961776,
-                lng: -3.201612
+        if ($scope.drawnRoute) {
+            $scope.drawnRoute.setMap(null);
+        }
+        $scope.selectedMarker = null;
+        $scope.drawnRoute = null;
+
+        if(removeMarkers) {
+            if ($scope.busMarkers) {
+                $scope.busMarkers.forEach((busMarker) => {
+                    busMarker.setMap(null);
+                });
+            }
+            $scope.busMarkers = [];
+        }
+    }
+
+    function createNewMarker(bus) {
+        let marker = new google.maps.Marker({
+            position: {
+                lat: bus.Lat,
+                lng: bus.Lon
             },
-            scrollwheel: true,
-            zoom: 12
+            map: map,
+            icon: ICONS[bus.Type],
+            bus: bus.BusId,
+            title:
+            'Fleet num: ' + bus.BusId +
+            ', Service: ' +
+            bus.MnemoService
         });
 
-        getServices();
-        getBusesByService("All");
-        getBusStops();
+        marker.addListener('click', () => {
+            cleanMap(false);
+            $scope.selectedMarker = marker;
+            $scope.selectedBus = bus;
+            busRouteClick();
+        });
+
+        return marker;
     }
+
+    function busRouteClick() {
+        var content = "<div style=\"width:250px; max-height:172px; overflow:auto;\">" +
+            "<h3>Fleet num: " + $scope.selectedBus.BusId +
+            ", Service: " + $scope.selectedBus.MnemoService +
+            "</h3>";
+
+        if ($scope.selectedBus.NextStop !== "") {
+            getActiveBusMarkerContent(content);
+        } else {
+            getInactiveBusMarkerContent();
+        }
+    }
+
+    function update() {
+        if($scope.busId) {
+            getSingleBus($scope.busId);
+        } else {
+            getBusesByService($scope.dropdownSelected);
+        }
+    };
 
     initialSetup();
 }]);
