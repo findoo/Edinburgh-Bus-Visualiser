@@ -1,0 +1,10 @@
+:root {
+  --popup-height: 172px;
+  --popup-padding: 2px;
+}
+
+.popupContainer {
+  max-height: var(--popup-height);
+  padding: var(--popup-padding);
+  overflow: auto;
+}

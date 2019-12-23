@@ -1,0 +1,46 @@
+:root {
+  --burger-color: #505050;
+}
+
+.burger {
+  margin-right: 40px;
+  cursor: pointer;
+
+  @media (min-width: 1024px) {
+    display: none;
+  }
+}
+
+.burgerOpen {
+  @media (max-width: 1024px) {
+    width: 100%;
+    order: -1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+  }
+}
+
+.bar {
+  width: 35px;
+  height: 5px;
+  background-color: var(--burger-color);
+  margin: 6px 0;
+}
+
+.barOpen {
+  background-color: var(--burger-color);
+  -webkit-transform: rotate(-45deg) translate(-9px, 6px);
+  transform: rotate(-45deg) translate(-9px, 6px);
+}
+
+.barOpen2 {
+  background-color: var(--burger-color);
+  opacity: 0;
+}
+
+.barOpen3 {
+  background-color: var(--burger-color);
+  -webkit-transform: rotate(45deg) translate(-8px, -8px);
+  transform: rotate(45deg) translate(-8px, -8px);
+}

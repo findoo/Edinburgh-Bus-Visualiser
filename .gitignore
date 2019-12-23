@@ -1,9 +1,30 @@
-*.DS_Store
-*.vscode
-*node_modules
-*.bin
-
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# production
+/build
+
+# misc
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.production
+.env
+*.DS_Store
+*.vscode
+*.bin
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
