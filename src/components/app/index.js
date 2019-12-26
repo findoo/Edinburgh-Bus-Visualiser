@@ -1,12 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { Fragment, useState, useEffect, useRef } from "react";
 
 import { getBusesByService, getBusStops, getServices } from "../../dispatches";
 import { ALL } from "./consts";
 import Markers from "../markers";
 import Map from "../map";
 import Menu from "../menu";
-
-const Container = <div style={{ height: `100vh` }} />;
 
 const App = () => {
   const mapRef = useRef();
@@ -44,7 +42,7 @@ const App = () => {
   }, [fleetNumberFilter]);
 
   return (
-    <div className="App">
+    <Fragment>
       <Menu
         buses={filteredBuses}
         fleetNumberFilter={fleetNumberFilter}
@@ -53,16 +51,10 @@ const App = () => {
         services={services}
         setServiceNumber={setServiceFilter}
       />
-      <Map
-        mapRef={mapRef}
-        googleMapURL={process.env.REACT_APP_MAP_API}
-        loadingElement={Container}
-        containerElement={Container}
-        mapElement={Container}
-      >
+      <Map mapRef={mapRef}>
         <Markers buses={filteredBuses} stops={stops} />
       </Map>
-    </div>
+    </Fragment>
   );
 };
 
