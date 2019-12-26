@@ -38,18 +38,21 @@ const Menu = ({
         })}
       >
         <div className={styles.control}>
-          <label htmlFor="service" className={styles.label}>
+          <label htmlFor="services" className={styles.label}>
             {lang.service}
           </label>
           <br />
           <select
             className={styles.select}
-            name="service"
+            name="services"
+            data-testid="services"
             onChange={e => setServiceNumber(e.target.value)}
             disabled={!!fleetNumberFilter}
           >
             {services.map(service => (
-              <option value={service.ref}>{service.mnemo}</option>
+              <option key={service.ref} value={service.ref}>
+                {service.mnemo}
+              </option>
             ))}
           </select>
         </div>
@@ -61,19 +64,24 @@ const Menu = ({
           <br />
           <input
             name="fleet"
+            data-testid="fleet"
             type="number"
             className={styles.input}
             onChange={e => setFleetNumber(e.target.value)}
           />
         </div>
 
-        <label className={styles.busCount}>
+        <label className={styles.busCount} data-testid="vehicleCount">
           {lang.showing}
           {buses.length}
           {lang.vehicles}
         </label>
 
-        <button className={styles.refresh} onClick={refresh}>
+        <button
+          className={styles.refresh}
+          onClick={refresh}
+          data-testid="refresh"
+        >
           <img className={styles.refreshIcon} alt="refresh" src={refreshIcon} />
         </button>
       </div>
