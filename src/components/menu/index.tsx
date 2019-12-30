@@ -65,7 +65,7 @@ const Menu = ({
           <input
             name="fleet"
             data-testid="fleet"
-            type="number"
+            type="text"
             className={styles.input}
             onChange={e => setFleetNumber(e.target.value)}
           />

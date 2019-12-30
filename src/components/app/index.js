@@ -6,6 +6,18 @@ import Markers from "../markers";
 import Map from "../map";
 import Menu from "../menu";
 
+const fleetFilter = (bus, fleetNumberFilter) => {
+  const rangeSplit = fleetNumberFilter.split("-");
+  if (rangeSplit.length === 2) {
+    return (
+      bus.BusId >= parseInt(rangeSplit[0]) &&
+      bus.BusId <= parseInt(rangeSplit[1])
+    );
+  }
+
+  return bus.BusId === parseInt(fleetNumberFilter);
+};
+
 const App = () => {
   const mapRef = useRef();
   const [buses, setBuses] = useState([]);
@@ -22,7 +34,7 @@ const App = () => {
 
   const filteredBuses = buses.filter(bus => {
     if (fleetNumberFilter) {
-      return bus.BusId === parseInt(fleetNumberFilter);
+      return fleetFilter(bus, fleetNumberFilter);
     }
 
     if (serviceFilter) {
