@@ -6,10 +6,14 @@ import { buildRoute } from "../../helpers";
 import { Bus, BusIcons, Stop, RouteStop } from "../../types";
 import Popup from "../popup";
 import RoutePath from "../routePath";
+import airport from "./images/airport.png";
 import bus from "./images/busicon.png";
+import crosscountry from "./images/crosscountry.png";
+import eastcoast from "./images/eastcoast.png";
 import night from "./images/nighticon.png";
 import tram from "./images/tramicon.png";
 import noservice from "./images/noserviceicon.png";
+import { CROSSCOUNTRY, EASTCOAST, AIRPORT } from "./consts";
 
 type MarkerProps = {
   bus: Bus;
@@ -19,10 +23,37 @@ type MarkerProps = {
 };
 
 const ICONS: BusIcons = {
+  airport,
   bus,
+  crosscountry,
+  eastcoast,
   night,
   tram,
   noservice
+};
+
+const getIcon = (bus: Bus) => {
+  if (bus.Type === "tram") {
+    return ICONS.tram;
+  }
+
+  if (!bus.MnemoService) {
+    return ICONS.noservice;
+  }
+
+  if (AIRPORT.includes(bus.MnemoService)) {
+    return ICONS.airport;
+  }
+
+  if (CROSSCOUNTRY.includes(bus.MnemoService)) {
+    return ICONS.crosscountry;
+  }
+
+  if (EASTCOAST.includes(bus.MnemoService)) {
+    return ICONS.eastcoast;
+  }
+
+  return ICONS.bus;
 };
 
 const Markers = ({ bus, isSelected, setSelected, stops }: MarkerProps) => {
@@ -49,7 +80,7 @@ const Markers = ({ bus, isSelected, setSelected, stops }: MarkerProps) => {
       <Marker
         key={bus.BusId}
         position={{ lat: bus.Lat, lng: bus.Lon }}
-        icon={!!bus.MnemoService ? ICONS[bus.Type] : ICONS.noservice}
+        icon={getIcon(bus)}
         title={`Fleet num: ${bus.BusId}, Service: ${bus.MnemoService}`}
         onClick={() => setSelected(bus)}
       >
