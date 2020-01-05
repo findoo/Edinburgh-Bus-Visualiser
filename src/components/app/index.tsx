@@ -6,15 +6,16 @@ import { ALL } from "../../consts";
 import Markers from "../markers";
 import Map from "../map";
 import Menu from "../menu";
+import { Bus, MapType, Stop, Service } from "../../types";
 
 const App = () => {
-  const mapRef = useRef();
-  const [buses, setBuses] = useState([]);
-  const [stops, setStops] = useState([]);
-  const [services, setServices] = useState([]);
-  const [typeFilter, setTypeFilter] = useState(ALL);
-  const [fleetNumberFilter, setFleetNumber] = useState(null);
-  const [serviceFilter, setServiceFilter] = useState(ALL);
+  const mapRef = useRef<MapType>();
+  const [buses, setBuses] = useState<Bus[]>([]);
+  const [stops, setStops] = useState<Stop[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
+  const [typeFilter, setTypeFilter] = useState<string>(ALL);
+  const [fleetNumberFilter, setFleetNumber] = useState<string>("");
+  const [serviceFilter, setServiceFilter] = useState<string>(ALL);
 
   useEffect(() => {
     getBusesByService(ALL, setBuses);
@@ -22,7 +23,7 @@ const App = () => {
     getServices(setServices);
   }, []);
 
-  const filteredBuses = buses.filter(bus => {
+  const filteredBuses = buses.filter((bus: Bus): boolean => {
     if (fleetNumberFilter) {
       return filterFleet(bus, fleetNumberFilter);
     }
@@ -39,7 +40,7 @@ const App = () => {
   });
 
   useEffect(() => {
-    if (fleetNumberFilter && filteredBuses.length === 1) {
+    if (fleetNumberFilter && filteredBuses.length === 1 && mapRef.current) {
       mapRef.current.panTo({
         lat: filteredBuses[0].Lat,
         lng: filteredBuses[0].Lon

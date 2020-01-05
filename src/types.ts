@@ -5,6 +5,8 @@ export type Bus = {
   BusId: number;
   MnemoService: string;
   RefService: string;
+  JourneyId: string;
+  NextStop: string;
 };
 
 export type Stop = {
@@ -35,4 +37,13 @@ export type BusIcons = {
 export type Service = {
   mnemo: string;
   ref: string;
+};
+
+type PanTo = {
+  lat: number;
+  lng: number;
+};
+
+export type MapType = {
+  panTo: (panTo: PanTo) => void;
 };

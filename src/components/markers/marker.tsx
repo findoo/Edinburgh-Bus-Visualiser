@@ -62,7 +62,12 @@ const getIcon = (bus: Bus) => {
   return ICONS.bus;
 };
 
-const Markers = ({ bus, isSelected, setSelected, stops }: MarkerProps) => {
+const Markers = ({
+  bus,
+  isSelected,
+  setSelected,
+  stops
+}: MarkerProps): JSX.Element => {
   const [route, setRoute] = useState<RouteStop[] | null>([]);
 
   useEffect(() => {

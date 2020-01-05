@@ -35,7 +35,7 @@ export function buildRoute(
   ];
 }
 
-export function filterType(bus: Bus, typeFilter: string) {
+export function filterType(bus: Bus, typeFilter: string): boolean {
   if (typeFilter === ALL) {
     return true;
   }
@@ -66,9 +66,11 @@ export function filterType(bus: Bus, typeFilter: string) {
   if (typeFilter === PROVIDER_TRAM) {
     return bus.Type === TYPE_TRAM;
   }
+
+  return false;
 }
 
-export function filterFleet(bus: Bus, fleetNumberFilter: string) {
+export function filterFleet(bus: Bus, fleetNumberFilter: string): boolean {
   const rangeSplit = fleetNumberFilter.split("-");
   if (rangeSplit.length === 2) {
     return (
