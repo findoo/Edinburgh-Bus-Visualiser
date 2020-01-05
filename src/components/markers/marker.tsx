@@ -1,6 +1,7 @@
 import React, { Fragment, useState, useEffect } from "react";
 import { Marker } from "react-google-maps";
 
+import lang from "./lang";
 import { getRouteData } from "../../dispatches";
 import { buildRoute } from "../../helpers";
 import { Bus, BusIcons, Stop, RouteStop } from "../../types";
@@ -13,7 +14,12 @@ import eastcoast from "./images/eastcoast.png";
 import night from "./images/nighticon.png";
 import tram from "./images/tramicon.png";
 import noservice from "./images/noserviceicon.png";
-import { CROSSCOUNTRY, EASTCOAST, AIRPORT } from "./consts";
+import {
+  SERVICES_CROSSCOUNTRY,
+  SERVICES_EASTCOAST,
+  SERVICES_AIRPORT,
+  TYPE_TRAM
+} from "../../consts";
 
 type MarkerProps = {
   bus: Bus;
@@ -33,7 +39,7 @@ const ICONS: BusIcons = {
 };
 
 const getIcon = (bus: Bus) => {
-  if (bus.Type === "tram") {
+  if (bus.Type === TYPE_TRAM) {
     return ICONS.tram;
   }
 
@@ -41,15 +47,15 @@ const getIcon = (bus: Bus) => {
     return ICONS.noservice;
   }
 
-  if (AIRPORT.includes(bus.MnemoService)) {
+  if (SERVICES_AIRPORT.includes(bus.MnemoService)) {
     return ICONS.airport;
   }
 
-  if (CROSSCOUNTRY.includes(bus.MnemoService)) {
+  if (SERVICES_CROSSCOUNTRY.includes(bus.MnemoService)) {
     return ICONS.crosscountry;
   }
 
-  if (EASTCOAST.includes(bus.MnemoService)) {
+  if (SERVICES_EASTCOAST.includes(bus.MnemoService)) {
     return ICONS.eastcoast;
   }
 
@@ -81,7 +87,7 @@ const Markers = ({ bus, isSelected, setSelected, stops }: MarkerProps) => {
         key={bus.BusId}
         position={{ lat: bus.Lat, lng: bus.Lon }}
         icon={getIcon(bus)}
-        title={`Fleet num: ${bus.BusId}, Service: ${bus.MnemoService}`}
+        title={`${lang.fleet}${bus.BusId}${lang.service}${bus.MnemoService}`}
         onClick={() => setSelected(bus)}
       >
         <Popup

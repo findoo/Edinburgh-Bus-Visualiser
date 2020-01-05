@@ -1,4 +1,17 @@
 import { RouteStop, Stop, Bus, JourneyTime } from "./types";
+import {
+  ALL,
+  SERVICES_EASTCOAST,
+  SERVICES_CROSSCOUNTRY,
+  SERVICES_AIRPORT,
+  PROVIDER_EASTCOAST,
+  PROVIDER_COUNTRY,
+  PROVIDER_LOTHIAN,
+  TYPE_TRAM,
+  PROVIDER_TRAM,
+  PROVIDER_AIRPORT,
+  TYPE_BUS
+} from "./consts";
 
 export function buildRoute(
   bus: Bus,
@@ -20,4 +33,49 @@ export function buildRoute(
       };
     })
   ];
+}
+
+export function filterType(bus: Bus, typeFilter: string) {
+  if (typeFilter === ALL) {
+    return true;
+  }
+
+  if (typeFilter === PROVIDER_EASTCOAST) {
+    return SERVICES_EASTCOAST.includes(bus.MnemoService);
+  }
+
+  if (typeFilter === PROVIDER_COUNTRY) {
+    return SERVICES_CROSSCOUNTRY.includes(bus.MnemoService);
+  }
+
+  if (typeFilter === PROVIDER_LOTHIAN) {
+    return (
+      bus.Type === TYPE_BUS &&
+      ![
+        ...SERVICES_CROSSCOUNTRY,
+        ...SERVICES_AIRPORT,
+        ...SERVICES_EASTCOAST
+      ].includes(bus.MnemoService)
+    );
+  }
+
+  if (typeFilter === PROVIDER_AIRPORT) {
+    return SERVICES_AIRPORT.includes(bus.MnemoService);
+  }
+
+  if (typeFilter === PROVIDER_TRAM) {
+    return bus.Type === TYPE_TRAM;
+  }
+}
+
+export function filterFleet(bus: Bus, fleetNumberFilter: string) {
+  const rangeSplit = fleetNumberFilter.split("-");
+  if (rangeSplit.length === 2) {
+    return (
+      bus.BusId >= parseInt(rangeSplit[0]) &&
+      bus.BusId <= parseInt(rangeSplit[1])
+    );
+  }
+
+  return bus.BusId === parseInt(fleetNumberFilter);
 }

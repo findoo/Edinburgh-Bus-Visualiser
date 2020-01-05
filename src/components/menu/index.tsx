@@ -2,24 +2,32 @@ import React, { useState } from "react";
 import cx from "classnames";
 
 import styles from "./index.module.scss";
+import Control from "./control";
 import { Bus, Service } from "../../types";
 import refreshIcon from "./refreshicon.svg";
 import { lang } from "./lang";
 import Burger from "../burger";
+import { ALL, PROVIDERS } from "../../consts";
 
 type MenuProps = {
   buses: Bus[];
   services: Service[];
+  typeFilter: string;
+  serviceFilter: string;
   fleetNumberFilter: string;
   setFleetNumber: (fleetNumber: string) => void;
+  setTypeFilter: (type: string) => void;
   setServiceNumber: (serviceNumber: string) => void;
   refresh: () => void;
 };
 
 const Menu = ({
   buses,
+  typeFilter,
+  serviceFilter,
   fleetNumberFilter,
   setFleetNumber,
+  setTypeFilter,
   setServiceNumber,
   refresh,
   services
@@ -37,17 +45,13 @@ const Menu = ({
           [styles.fullScreenMobileOpen]: isOpen
         })}
       >
-        <div className={styles.control}>
-          <label htmlFor="services" className={styles.label}>
-            {lang.service}
-          </label>
-          <br />
+        <Control name="services" label={lang.service}>
           <select
             className={styles.select}
             name="services"
             data-testid="services"
             onChange={e => setServiceNumber(e.target.value)}
-            disabled={!!fleetNumberFilter}
+            disabled={!!fleetNumberFilter || typeFilter !== ALL}
           >
             {services.map(service => (
               <option key={service.ref} value={service.ref}>
@@ -55,13 +59,25 @@ const Menu = ({
               </option>
             ))}
           </select>
-        </div>
+        </Control>
 
-        <div className={styles.control}>
-          <label htmlFor="fleet" className={styles.label}>
-            {lang.fleet}
-          </label>
-          <br />
+        <Control name="type" label={lang.type}>
+          <select
+            className={styles.select}
+            name="type"
+            data-testid="type"
+            onChange={e => setTypeFilter(e.target.value)}
+            disabled={!!fleetNumberFilter || serviceFilter !== ALL}
+          >
+            {PROVIDERS.map(provider => (
+              <option key={provider} value={provider}>
+                {provider}
+              </option>
+            ))}
+          </select>
+        </Control>
+
+        <Control name="fleet" label={lang.fleet}>
           <input
             name="fleet"
             data-testid="fleet"
@@ -69,7 +85,7 @@ const Menu = ({
             className={styles.input}
             onChange={e => setFleetNumber(e.target.value)}
           />
-        </div>
+        </Control>
 
         <label className={styles.busCount} data-testid="vehicleCount">
           {lang.showing}

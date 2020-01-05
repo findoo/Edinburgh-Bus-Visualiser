@@ -1,5 +1,5 @@
 import axios from "axios";
-import { ALL } from "./components/app/consts";
+import { ALL } from "./consts";
 
 const ENDPOINT_BUSES = `${process.env.REACT_APP_API_URL}/getBuses/`;
 

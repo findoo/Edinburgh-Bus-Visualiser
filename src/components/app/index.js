@@ -1,28 +1,18 @@
 import React, { Fragment, useState, useEffect, useRef } from "react";
 
 import { getBusesByService, getBusStops, getServices } from "../../dispatches";
-import { ALL } from "./consts";
+import { filterFleet, filterType } from "../../helpers";
+import { ALL } from "../../consts";
 import Markers from "../markers";
 import Map from "../map";
 import Menu from "../menu";
-
-const fleetFilter = (bus, fleetNumberFilter) => {
-  const rangeSplit = fleetNumberFilter.split("-");
-  if (rangeSplit.length === 2) {
-    return (
-      bus.BusId >= parseInt(rangeSplit[0]) &&
-      bus.BusId <= parseInt(rangeSplit[1])
-    );
-  }
-
-  return bus.BusId === parseInt(fleetNumberFilter);
-};
 
 const App = () => {
   const mapRef = useRef();
   const [buses, setBuses] = useState([]);
   const [stops, setStops] = useState([]);
   const [services, setServices] = useState([]);
+  const [typeFilter, setTypeFilter] = useState(ALL);
   const [fleetNumberFilter, setFleetNumber] = useState(null);
   const [serviceFilter, setServiceFilter] = useState(ALL);
 
@@ -34,11 +24,15 @@ const App = () => {
 
   const filteredBuses = buses.filter(bus => {
     if (fleetNumberFilter) {
-      return fleetFilter(bus, fleetNumberFilter);
+      return filterFleet(bus, fleetNumberFilter);
     }
 
-    if (serviceFilter) {
-      return bus.RefService === serviceFilter || serviceFilter === ALL;
+    if (typeFilter !== ALL) {
+      return filterType(bus, typeFilter);
+    }
+
+    if (serviceFilter !== ALL) {
+      return bus.RefService === serviceFilter;
     }
 
     return true;
@@ -57,11 +51,14 @@ const App = () => {
     <Fragment>
       <Menu
         buses={filteredBuses}
+        serviceFilter={serviceFilter}
+        typeFilter={typeFilter}
         fleetNumberFilter={fleetNumberFilter}
         setFleetNumber={setFleetNumber}
         refresh={() => getBusesByService(ALL, setBuses)}
         services={services}
         setServiceNumber={setServiceFilter}
+        setTypeFilter={setTypeFilter}
       />
       <Map mapRef={mapRef}>
         <Markers buses={filteredBuses} stops={stops} />
