@@ -12,7 +12,6 @@ const Control = ({ children, label, name }: ControlProps) => (
     <label htmlFor={name} className={styles.label}>
       {label}
     </label>
-    <br />
     {children}
   </div>
 );

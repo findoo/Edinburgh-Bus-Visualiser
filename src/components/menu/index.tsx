@@ -11,26 +11,30 @@ import { ALL, PROVIDERS } from "../../consts";
 
 type MenuProps = {
   buses: Bus[];
-  services: Service[];
-  typeFilter: string;
-  serviceFilter: string;
   fleetNumberFilter: string;
-  setFleetNumber: (fleetNumber: string) => void;
-  setTypeFilter: (type: string) => void;
-  setServiceNumber: (serviceNumber: string) => void;
   refresh: () => void;
+  services: Service[];
+  serviceFilter: string;
+  setFleetNumber: (fleetNumber: string) => void;
+  setServiceNumber: (serviceNumber: string) => void;
+  setShowOutOfService: (showOutOfService: boolean) => void;
+  setTypeFilter: (type: string) => void;
+  showOutOfService: boolean;
+  typeFilter: string;
 };
 
 const Menu = ({
   buses,
-  typeFilter,
-  serviceFilter,
   fleetNumberFilter,
+  refresh,
+  serviceFilter,
+  services,
   setFleetNumber,
+  setShowOutOfService,
   setTypeFilter,
   setServiceNumber,
-  refresh,
-  services
+  showOutOfService,
+  typeFilter
 }: MenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -84,6 +88,16 @@ const Menu = ({
             type="text"
             className={styles.input}
             onChange={e => setFleetNumber(e.target.value)}
+          />
+        </Control>
+
+        <Control name="inService" label={lang.outOfService}>
+          <input
+            name="inService"
+            type="checkbox"
+            checked={showOutOfService}
+            onChange={e => setShowOutOfService(!showOutOfService)}
+            disabled={!!fleetNumberFilter}
           />
         </Control>
 

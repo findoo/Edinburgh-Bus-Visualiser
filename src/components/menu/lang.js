@@ -4,5 +4,6 @@ export const lang = {
   type: "Type: ",
   fleet: "Fleet number: ",
   showing: "Showing ",
-  vehicles: " vehicle/s"
+  vehicles: " vehicle/s",
+  outOfService: "Out of service"
 };

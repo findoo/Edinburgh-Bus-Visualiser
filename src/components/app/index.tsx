@@ -16,6 +16,7 @@ const App = () => {
   const [typeFilter, setTypeFilter] = useState<string>(ALL);
   const [fleetNumberFilter, setFleetNumber] = useState<string>("");
   const [serviceFilter, setServiceFilter] = useState<string>(ALL);
+  const [showOutOfService, setShowOutOfService] = useState<boolean>(true);
 
   useEffect(() => {
     getBusesByService(ALL, setBuses);
@@ -26,6 +27,10 @@ const App = () => {
   const filteredBuses = buses.filter((bus: Bus): boolean => {
     if (fleetNumberFilter) {
       return filterFleet(bus, fleetNumberFilter);
+    }
+
+    if (!showOutOfService && !bus.RefService) {
+      return false;
     }
 
     if (typeFilter !== ALL) {
@@ -52,14 +57,16 @@ const App = () => {
     <Fragment>
       <Menu
         buses={filteredBuses}
-        serviceFilter={serviceFilter}
-        typeFilter={typeFilter}
         fleetNumberFilter={fleetNumberFilter}
-        setFleetNumber={setFleetNumber}
         refresh={() => getBusesByService(ALL, setBuses)}
+        serviceFilter={serviceFilter}
         services={services}
+        setFleetNumber={setFleetNumber}
         setServiceNumber={setServiceFilter}
+        setShowOutOfService={setShowOutOfService}
         setTypeFilter={setTypeFilter}
+        showOutOfService={showOutOfService}
+        typeFilter={typeFilter}
       />
       <Map mapRef={mapRef}>
         <Markers buses={filteredBuses} stops={stops} />
