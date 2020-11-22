@@ -24,21 +24,21 @@ const RoutePath = ({ route, isShown }: RoutePathProps) => {
         icons: [
           {
             icon: { path: 2 },
-            offset: "100%"
+            offset: "100%",
           },
           {
             icon: { path: 2 },
-            offset: "75%"
+            offset: "75%",
           },
           {
             icon: { path: 2 },
-            offset: "50%"
+            offset: "50%",
           },
           {
             icon: { path: 2 },
-            offset: "25%"
-          }
-        ]
+            offset: "25%",
+          },
+        ],
       }}
     />
   );

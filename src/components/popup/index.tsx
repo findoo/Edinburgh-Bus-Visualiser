@@ -31,7 +31,7 @@ const Popup = ({ isShown, bus, route, dismiss }: PopupProps) => {
           <ul>
             {route
               .filter((stop: RouteStop) => !!stop.time)
-              .map(stop => (
+              .map((stop) => (
                 <li key={stop.name}>
                   {stop.name}: {stop.time}
                 </li>

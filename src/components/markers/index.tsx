@@ -13,7 +13,7 @@ const Markers = ({ buses, stops }: MarkersProps): JSX.Element => {
 
   return (
     <Fragment>
-      {buses.map(bus => (
+      {buses.map((bus) => (
         <Marker
           key={bus.BusId}
           bus={bus}

@@ -9,7 +9,7 @@ import { lang } from "./lang";
 import Burger from "../burger";
 import { ALL, PROVIDERS } from "../../consts";
 
-type MenuProps = {
+export type MenuProps = {
   buses: Bus[];
   fleetNumberFilter: string;
   refresh: () => void;
@@ -34,19 +34,24 @@ const Menu = ({
   setTypeFilter,
   setServiceNumber,
   showOutOfService,
-  typeFilter
+  typeFilter,
 }: MenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <nav className={cx({ [styles.nav]: true, [styles.navOpen]: isOpen })}>
-      <h1 className={cx({ [styles.title]: true, [styles.openTitle]: isOpen })}>
+      <h1
+        className={cx({
+          [styles.title]: true,
+          [styles.openTitle]: isOpen,
+        })}
+      >
         {lang.title}
       </h1>
       <div
         className={cx({
           [styles.fullScreenMobileClosed]: !isOpen,
-          [styles.fullScreenMobileOpen]: isOpen
+          [styles.fullScreenMobileOpen]: isOpen,
         })}
       >
         <Control name="services" label={lang.service}>
@@ -54,10 +59,10 @@ const Menu = ({
             className={styles.select}
             name="services"
             data-testid="services"
-            onChange={e => setServiceNumber(e.target.value)}
+            onChange={(e) => setServiceNumber(e.target.value)}
             disabled={!!fleetNumberFilter || typeFilter !== ALL}
           >
-            {services.map(service => (
+            {services.map((service) => (
               <option key={service.ref} value={service.ref}>
                 {service.mnemo}
               </option>
@@ -70,10 +75,10 @@ const Menu = ({
             className={styles.select}
             name="type"
             data-testid="type"
-            onChange={e => setTypeFilter(e.target.value)}
+            onChange={(e) => setTypeFilter(e.target.value)}
             disabled={!!fleetNumberFilter || serviceFilter !== ALL}
           >
-            {PROVIDERS.map(provider => (
+            {PROVIDERS.map((provider) => (
               <option key={provider} value={provider}>
                 {provider}
               </option>
@@ -87,7 +92,7 @@ const Menu = ({
             data-testid="fleet"
             type="text"
             className={styles.input}
-            onChange={e => setFleetNumber(e.target.value)}
+            onChange={(e) => setFleetNumber(e.target.value)}
           />
         </Control>
 
@@ -96,7 +101,7 @@ const Menu = ({
             name="inService"
             type="checkbox"
             checked={showOutOfService}
-            onChange={e => setShowOutOfService(!showOutOfService)}
+            onChange={(_e) => setShowOutOfService(!showOutOfService)}
             disabled={!!fleetNumberFilter}
           />
         </Control>

@@ -18,7 +18,7 @@ import {
   SERVICES_CROSSCOUNTRY,
   SERVICES_EASTCOAST,
   SERVICES_AIRPORT,
-  TYPE_TRAM
+  TYPE_TRAM,
 } from "../../consts";
 
 type MarkerProps = {
@@ -35,7 +35,7 @@ const ICONS: BusIcons = {
   eastcoast,
   night,
   tram,
-  noservice
+  noservice,
 };
 
 const getIcon = (bus: Bus) => {
@@ -66,7 +66,7 @@ const Markers = ({
   bus,
   isSelected,
   setSelected,
-  stops
+  stops,
 }: MarkerProps): JSX.Element => {
   const [route, setRoute] = useState<RouteStop[] | null>([]);
 
@@ -75,7 +75,7 @@ const Markers = ({
 
     if (isSelected) {
       getRouteData(bus)
-        .then(response => {
+        .then((response) => {
           if (response.data.journeyTimes.length) {
             setRoute(buildRoute(bus, response.data.journeyTimes, stops));
           }

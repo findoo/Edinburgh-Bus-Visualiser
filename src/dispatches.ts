@@ -17,18 +17,20 @@ export const getBusesByService = (
   axios.get(`${ENDPOINT_BUSES}${service}`).then(({ data }) => setBuses(data));
 
 export const getBusStops = (setStops: (data: Stop[]) => void) =>
-  axios.get(ENDPOINT_STOPS).then(response => setStops(response.data.busStops));
+  axios
+    .get(ENDPOINT_STOPS)
+    .then((response) => setStops(response.data.busStops));
 
 export const getRouteData = (bus: Bus) =>
   axios.get(`${ENDPOINT_ROUTE}${bus.BusId}/${bus.JourneyId}/${bus.NextStop}`);
 
 export const getServices = (setServices: (data: Service[]) => void) =>
-  axios.get(ENDPOINT_SERVICES).then(response =>
+  axios.get(ENDPOINT_SERVICES).then((response) =>
     setServices([
       {
         mnemo: ALL,
-        ref: ALL
+        ref: ALL,
       },
-      ...response.data.services
+      ...response.data.services,
     ])
   );

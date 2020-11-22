@@ -2,16 +2,21 @@ import React from "react";
 import { render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import Menu from ".";
+import Menu, { MenuProps } from ".";
 import { Bus } from "../../types";
 
-const requiredProps = {
+const requiredProps: MenuProps = {
   buses: [],
   services: [],
   fleetNumberFilter: "",
+  serviceFilter: "",
+  typeFilter: "",
+  showOutOfService: false,
   setFleetNumber: jest.fn(),
   setServiceNumber: jest.fn(),
-  refresh: jest.fn()
+  setShowOutOfService: jest.fn(),
+  setTypeFilter: jest.fn(),
+  refresh: jest.fn(),
 };
 
 const mockBus: Bus = {
@@ -20,7 +25,9 @@ const mockBus: Bus = {
   Lon: 2,
   MnemoService: "44",
   RefService: "1",
-  Type: "bus"
+  JourneyId: "23",
+  NextStop: "99",
+  Type: "bus",
 };
 
 describe("Menu", () => {
@@ -49,7 +56,7 @@ describe("Menu", () => {
         {...requiredProps}
         services={[
           { mnemo: "1", ref: "2" },
-          { mnemo: "3", ref: "4" }
+          { mnemo: "3", ref: "4" },
         ]}
       />
     );
@@ -63,7 +70,7 @@ describe("Menu", () => {
         {...requiredProps}
         services={[
           { mnemo: "a", ref: "1" },
-          { mnemo: "b", ref: "2" }
+          { mnemo: "b", ref: "2" },
         ]}
       />
     );

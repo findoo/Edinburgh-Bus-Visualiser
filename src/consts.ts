@@ -15,7 +15,7 @@ export const PROVIDERS = [
   PROVIDER_EASTCOAST,
   PROVIDER_COUNTRY,
   PROVIDER_AIRPORT,
-  PROVIDER_TRAM
+  PROVIDER_TRAM,
 ];
 
 export const SERVICES_CROSSCOUNTRY = [
@@ -31,7 +31,7 @@ export const SERVICES_CROSSCOUNTRY = [
   "275",
   "280",
   "287",
-  "N28"
+  "N28",
 ];
 
 export const SERVICES_EASTCOAST = [
@@ -50,7 +50,7 @@ export const SERVICES_EASTCOAST = [
   "124",
   "125",
   "126",
-  "127"
+  "127",
 ];
 
 export const SERVICES_AIRPORT = ["100", "200", "300", "400"];

@@ -10,7 +10,7 @@ import {
   TYPE_TRAM,
   PROVIDER_TRAM,
   PROVIDER_AIRPORT,
-  TYPE_BUS
+  TYPE_BUS,
 } from "./consts";
 
 export function buildRoute(
@@ -21,17 +21,17 @@ export function buildRoute(
   return [
     {
       lat: bus.Lat,
-      lng: bus.Lon
+      lng: bus.Lon,
     },
-    ...journeyTimes[0].journeyTimeDatas.map(upcomingStop => {
-      const matchedStop = stops.find(st => st.stopId === upcomingStop.stopId);
+    ...journeyTimes[0].journeyTimeDatas.map((upcomingStop) => {
+      const matchedStop = stops.find((st) => st.stopId === upcomingStop.stopId);
       return {
         lat: matchedStop?.x,
         lng: matchedStop?.y,
         name: matchedStop?.name,
-        time: upcomingStop.time
+        time: upcomingStop.time,
       };
-    })
+    }),
   ];
 }
 
@@ -54,7 +54,7 @@ export function filterType(bus: Bus, typeFilter: string): boolean {
       ![
         ...SERVICES_CROSSCOUNTRY,
         ...SERVICES_AIRPORT,
-        ...SERVICES_EASTCOAST
+        ...SERVICES_EASTCOAST,
       ].includes(bus.MnemoService)
     );
   }

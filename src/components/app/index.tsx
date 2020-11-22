@@ -48,7 +48,7 @@ const App = () => {
     if (fleetNumberFilter && filteredBuses.length === 1 && mapRef.current) {
       mapRef.current.panTo({
         lat: filteredBuses[0].Lat,
-        lng: filteredBuses[0].Lon
+        lng: filteredBuses[0].Lon,
       });
     }
   }, [fleetNumberFilter]);

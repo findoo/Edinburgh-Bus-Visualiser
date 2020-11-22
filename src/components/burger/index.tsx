@@ -14,19 +14,19 @@ const Burger = ({ isOpen, toggleOpen }: BurgerProps) => (
       <div
         className={cx({
           [styles.barOpen]: isOpen,
-          [styles.bar]: true
+          [styles.bar]: true,
         })}
       ></div>
       <div
         className={cx({
           [styles.barOpen2]: isOpen,
-          [styles.bar]: true
+          [styles.bar]: true,
         })}
       ></div>
       <div
         className={cx({
           [styles.barOpen3]: isOpen,
-          [styles.bar]: true
+          [styles.bar]: true,
         })}
       ></div>
     </div>
