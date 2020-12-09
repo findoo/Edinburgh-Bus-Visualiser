@@ -62,11 +62,18 @@ const Menu = ({
             onChange={(e) => setServiceNumber(e.target.value)}
             disabled={!!fleetNumberFilter || typeFilter !== ALL}
           >
-            {services.map((service) => (
-              <option key={service.ref} value={service.ref}>
-                {service.mnemo}
-              </option>
-            ))}
+            {services
+              .sort((a, b) => {
+                if (a.mnemo === ALL) {
+                  return -1;
+                }
+                return a.mnemo.localeCompare(b.mnemo);
+              })
+              .map((service) => (
+                <option key={service.ref} value={service.ref}>
+                  {service.mnemo}
+                </option>
+              ))}
           </select>
         </Control>
 
