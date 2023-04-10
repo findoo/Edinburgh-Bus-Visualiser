@@ -1,5 +1,4 @@
 import React from "react";
-import styles from "./control.module.scss";
 
 type ControlProps = {
   children: object;
@@ -8,8 +7,8 @@ type ControlProps = {
 };
 
 const Control = ({ children, label, name }: ControlProps) => (
-  <div className={styles.control}>
-    <label htmlFor={name} className={styles.label}>
+  <div className="flex flex-col items-center justify-center text-center font-bold">
+    <label htmlFor={name} className="mx-4 mb-2">
       {label}
     </label>
     {children}

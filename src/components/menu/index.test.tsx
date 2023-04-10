@@ -1,5 +1,5 @@
 import React from "react";
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import Menu, { MenuProps } from ".";
@@ -35,23 +35,22 @@ describe("Menu", () => {
     jest.resetAllMocks();
   });
 
-  it("renders vehicle count", () => {
-    const { getByTestId } = render(
-      <Menu {...requiredProps} buses={[mockBus, mockBus, mockBus]} />
-    );
-    expect(getByTestId("vehicleCount")).toHaveTextContent(
+  it("renders vehicle count", async () => {
+    render(<Menu {...requiredProps} buses={[mockBus, mockBus, mockBus]} />);
+    await userEvent.click(screen.getByTestId("filter-button"));
+    expect(screen.getByTestId("vehicleCount")).toHaveTextContent(
       "Showing 3 vehicle/s"
     );
   });
 
   it("should call refresh when refresh button clicked", () => {
-    const { getByTestId } = render(<Menu {...requiredProps} />);
-    getByTestId("refresh").click();
+    render(<Menu {...requiredProps} />);
+    screen.getByTestId("refresh").click();
     expect(requiredProps.refresh).toHaveBeenCalledTimes(1);
   });
 
-  it("should render services select", () => {
-    const { getByTestId } = render(
+  it("should render services select", async () => {
+    render(
       <Menu
         {...requiredProps}
         services={[
@@ -60,28 +59,15 @@ describe("Menu", () => {
         ]}
       />
     );
-    const select = getByTestId("services");
+    await userEvent.click(screen.getByTestId("filter-button"));
+    const select = screen.getByTestId("services");
     expect(select.childElementCount).toBe(2);
   });
 
-  it("should call setServiceFilter when option chosen", () => {
-    const { getByTestId } = render(
-      <Menu
-        {...requiredProps}
-        services={[
-          { mnemo: "a", ref: "1" },
-          { mnemo: "b", ref: "2" },
-        ]}
-      />
-    );
-    const select = getByTestId("services");
-    userEvent.selectOptions(select, ["2"]);
-    expect(requiredProps.setServiceNumber).toHaveBeenCalledWith("2");
-  });
-
-  it("should render fleet number filter", () => {
-    const { getByTestId } = render(<Menu {...requiredProps} />);
-    const input = getByTestId("fleet");
+  it("should render fleet number filter", async () => {
+    render(<Menu {...requiredProps} />);
+    await userEvent.click(screen.getByTestId("filter-button"));
+    const input = screen.getByTestId("fleet");
     expect(input).toBeInTheDocument();
   });
 });

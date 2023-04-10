@@ -1,13 +1,11 @@
-import React, { useState } from "react";
-import cx from "classnames";
+import React from "react";
 
-import styles from "./index.module.scss";
 import Control from "./control";
 import { Bus, Service } from "../../types";
-import refreshIcon from "./refreshicon.svg";
 import { lang } from "./lang";
-import Burger from "../burger";
 import { ALL, PROVIDERS } from "../../consts";
+import { Popover, Transition } from "@headlessui/react";
+import { RefreshIcon } from "./refreshicon";
 
 export type MenuProps = {
   buses: Bus[];
@@ -36,99 +34,108 @@ const Menu = ({
   showOutOfService,
   typeFilter,
 }: MenuProps) => {
-  const [isOpen, setIsOpen] = useState(false);
-
   return (
-    <nav className={cx({ [styles.nav]: true, [styles.navOpen]: isOpen })}>
-      <h1
-        className={cx({
-          [styles.title]: true,
-          [styles.openTitle]: isOpen,
-        })}
-      >
-        {lang.title}
-      </h1>
-      <div
-        className={cx({
-          [styles.fullScreenMobileClosed]: !isOpen,
-          [styles.fullScreenMobileOpen]: isOpen,
-        })}
-      >
-        <Control name="services" label={lang.service}>
-          <select
-            className={styles.select}
-            name="services"
-            data-testid="services"
-            onChange={(e) => setServiceNumber(e.target.value)}
-            disabled={!!fleetNumberFilter || typeFilter !== ALL}
-          >
-            {services
-              .sort((a, b) => {
-                if (a.mnemo === ALL) {
-                  return -1;
-                }
-                return a.mnemo.localeCompare(b.mnemo);
-              })
-              .map((service) => (
-                <option key={service.ref} value={service.ref}>
-                  {service.mnemo}
-                </option>
-              ))}
-          </select>
-        </Control>
-
-        <Control name="type" label={lang.type}>
-          <select
-            className={styles.select}
-            name="type"
-            data-testid="type"
-            onChange={(e) => setTypeFilter(e.target.value)}
-            disabled={!!fleetNumberFilter || serviceFilter !== ALL}
-          >
-            {PROVIDERS.map((provider) => (
-              <option key={provider} value={provider}>
-                {provider}
-              </option>
-            ))}
-          </select>
-        </Control>
-
-        <Control name="fleet" label={lang.fleet}>
-          <input
-            name="fleet"
-            data-testid="fleet"
-            type="text"
-            className={styles.input}
-            onChange={(e) => setFleetNumber(e.target.value)}
-          />
-        </Control>
-
-        <Control name="inService" label={lang.outOfService}>
-          <input
-            name="inService"
-            type="checkbox"
-            checked={showOutOfService}
-            onChange={(_e) => setShowOutOfService(!showOutOfService)}
-            disabled={!!fleetNumberFilter}
-          />
-        </Control>
-
-        <label className={styles.busCount} data-testid="vehicleCount">
-          {lang.showing}
-          {buses.length}
-          {lang.vehicles}
-        </label>
-
+    <nav
+      className={
+        "fixed top-0 z-50 flex h-20 w-full items-center justify-between bg-white p-8 text-sm text-black dark:bg-slate-600 dark:text-white"
+      }
+    >
+      <h1 className="text-lg">{lang.title}</h1>
+      <div className="flex gap-4">
         <button
-          className={styles.refresh}
+          className="mx-auto flex-shrink-0 rounded-xl border p-4 text-center hover:bg-gray-100 dark:hover:bg-slate-500"
           onClick={refresh}
           data-testid="refresh"
         >
-          <img className={styles.refreshIcon} alt="refresh" src={refreshIcon} />
+          <RefreshIcon />
         </button>
-      </div>
 
-      <Burger isOpen={isOpen} toggleOpen={() => setIsOpen(!isOpen)} />
+        <Popover className="relative">
+          <Popover.Button
+            className="rounded-xl border p-4 hover:bg-gray-100 dark:hover:bg-slate-500"
+            data-testid="filter-button"
+          >
+            {lang.filters}
+          </Popover.Button>
+
+          <Transition
+            enter="transition duration-100 ease-out"
+            enterFrom="transform scale-95 opacity-0"
+            enterTo="transform scale-100 opacity-100"
+            leave="transition duration-75 ease-out"
+            leaveFrom="transform scale-100 opacity-100"
+            leaveTo="transform scale-95 opacity-0"
+          >
+            <Popover.Panel className="absolute right-0 top-3 z-10 flex w-60 flex-col gap-4 rounded border bg-white p-4 shadow-lg dark:bg-slate-600">
+              <Control name="services" label={lang.service}>
+                <select
+                  className="w-full rounded border border-gray-300 px-4 py-2 text-center disabled:cursor-not-allowed disabled:bg-gray-300 dark:bg-slate-500 dark:text-white dark:disabled:bg-gray-600"
+                  name="services"
+                  data-testid="services"
+                  onChange={(e) => setServiceNumber(e.target.value)}
+                  disabled={!!fleetNumberFilter || typeFilter !== ALL}
+                >
+                  {services
+                    .sort((a, b) => {
+                      if (a.mnemo === ALL) {
+                        return -1;
+                      }
+                      return a.mnemo.localeCompare(b.mnemo);
+                    })
+                    .map((service) => (
+                      <option key={service.ref} value={service.ref}>
+                        {service.mnemo}
+                      </option>
+                    ))}
+                </select>
+              </Control>
+
+              <Control name="type" label={lang.type}>
+                <select
+                  className="w-full rounded border border-gray-300 px-4 py-2 text-center text-black disabled:cursor-not-allowed disabled:bg-gray-300 dark:bg-slate-500 dark:text-white dark:disabled:bg-gray-600"
+                  name="type"
+                  data-testid="type"
+                  onChange={(e) => setTypeFilter(e.target.value)}
+                  disabled={!!fleetNumberFilter || serviceFilter !== ALL}
+                >
+                  {PROVIDERS.map((provider) => (
+                    <option key={provider} value={provider}>
+                      {provider}
+                    </option>
+                  ))}
+                </select>
+              </Control>
+
+              <Control name="fleet" label={lang.fleet}>
+                <input
+                  name="fleet"
+                  data-testid="fleet"
+                  type="text"
+                  className="w-full rounded border border-gray-300 px-4 py-2 text-center text-black dark:bg-slate-500 dark:text-white dark:disabled:bg-gray-600"
+                  placeholder="(12 or 12-100)"
+                  onChange={(e) => setFleetNumber(e.target.value)}
+                />
+              </Control>
+
+              <Control name="inService" label={lang.outOfService}>
+                <input
+                  name="inService"
+                  type="checkbox"
+                  checked={showOutOfService}
+                  onChange={(_e) => setShowOutOfService(!showOutOfService)}
+                  disabled={!!fleetNumberFilter}
+                />
+              </Control>
+
+              <label className="mx-auto text-center" data-testid="vehicleCount">
+                {lang.showing}
+                {buses.length}
+                {lang.vehicles}
+              </label>
+            </Popover.Panel>
+          </Transition>
+        </Popover>
+      </div>
     </nav>
   );
 };

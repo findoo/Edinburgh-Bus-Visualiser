@@ -1,5 +1,6 @@
 export const lang = {
   title: "Edinburgh Transport Visualisation",
+  filters: "Filters",
   service: "Service ",
   type: "Type ",
   fleet: "Fleet number ",

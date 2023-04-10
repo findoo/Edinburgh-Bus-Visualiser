@@ -1,8 +1,7 @@
 import React from "react";
 import { InfoWindow } from "react-google-maps";
 
-import styles from "./popup.module.css";
-import lang from "./lang";
+import { lang } from "./lang";
 import { Bus, RouteStop } from "../../types";
 
 type PopupProps = {
@@ -19,14 +18,14 @@ const Popup = ({ isShown, bus, route, dismiss }: PopupProps) => {
 
   return (
     <InfoWindow onCloseClick={dismiss}>
-      <div className={styles.popupContainer}>
+      <div className="max-h-[172px] overflow-auto p-2">
         <h3>
           {`${lang.fleetNum}${bus.BusId}`}
           {bus.MnemoService && `${lang.service}${bus.MnemoService}`}
         </h3>
 
         {route === null && lang.loading}
-        {route === [] && lang.noJourney}
+        {route?.length === 0 && lang.noJourney}
         {route && !!route.length && (
           <ul>
             {route
