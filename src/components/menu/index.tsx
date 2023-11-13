@@ -6,6 +6,7 @@ import { lang } from "./lang";
 import { ALL, PROVIDERS } from "../../consts";
 import { Popover, Transition } from "@headlessui/react";
 import { RefreshIcon } from "./refreshicon";
+import { isSpeedUrlParamEnabled } from "../../helpers";
 
 export type MenuProps = {
   buses: Bus[];
@@ -13,10 +14,12 @@ export type MenuProps = {
   refresh: () => void;
   services: Service[];
   serviceFilter: string;
+  speedMinFilter: string;
   setFleetNumber: (fleetNumber: string) => void;
   setServiceNumber: (serviceNumber: string) => void;
   setShowOutOfService: (showOutOfService: boolean) => void;
   setTypeFilter: (type: string) => void;
+  setSpeedMinFilter: (min: string) => void;
   showOutOfService: boolean;
   typeFilter: string;
 };
@@ -26,11 +29,13 @@ const Menu = ({
   fleetNumberFilter,
   refresh,
   serviceFilter,
+  speedMinFilter,
   services,
   setFleetNumber,
   setShowOutOfService,
   setTypeFilter,
   setServiceNumber,
+  setSpeedMinFilter,
   showOutOfService,
   typeFilter,
 }: MenuProps) => {
@@ -107,8 +112,23 @@ const Menu = ({
                   className="w-full rounded border border-gray-300 px-4 py-2 text-center text-black dark:bg-slate-500 dark:text-white dark:disabled:bg-gray-600"
                   placeholder="(12 or 12-100)"
                   onChange={(e) => setFleetNumber(e.target.value)}
+                  value={fleetNumberFilter}
                 />
               </Control>
+
+              {isSpeedUrlParamEnabled() && (
+                <Control name="speedMin" label={lang.speedMin}>
+                  <input
+                    name="speedMin"
+                    data-testid="speedMin"
+                    type="text"
+                    className="w-full rounded border border-gray-300 px-4 py-2 text-center text-black dark:bg-slate-500 dark:text-white dark:disabled:bg-gray-600"
+                    placeholder="30"
+                    onChange={(e) => setSpeedMinFilter(e.target.value)}
+                    value={speedMinFilter}
+                  />
+                </Control>
+              )}
 
               <Control name="inService" label={lang.outOfService}>
                 <input

@@ -81,3 +81,12 @@ export function filterFleet(bus: Bus, fleetNumberFilter: string): boolean {
 
   return bus.BusId === parseInt(fleetNumberFilter);
 }
+
+export function filterSpeed(bus: Bus, speed: string): boolean {
+  const speedInMph = bus.Speed * 0.621371;
+  return speedInMph > parseInt(speed);
+}
+
+export function isSpeedUrlParamEnabled(): boolean {
+  return window.location.search.includes("imnotagrass");
+}

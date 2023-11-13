@@ -9,12 +9,14 @@ const requiredProps: MenuProps = {
   buses: [],
   services: [],
   fleetNumberFilter: "",
+  speedMinFilter: "",
   serviceFilter: "",
   typeFilter: "",
   showOutOfService: false,
   setFleetNumber: jest.fn(),
   setServiceNumber: jest.fn(),
   setShowOutOfService: jest.fn(),
+  setSpeedMinFilter: jest.fn(),
   setTypeFilter: jest.fn(),
   refresh: jest.fn(),
 };
@@ -28,6 +30,7 @@ const mockBus: Bus = {
   JourneyId: "23",
   NextStop: "99",
   Type: "bus",
+  Speed: 1,
 };
 
 describe("Menu", () => {

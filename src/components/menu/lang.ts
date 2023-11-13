@@ -3,6 +3,7 @@ export const lang = {
   filters: "Filters",
   service: "Service ",
   type: "Type ",
+  speedMin: "Speed min ",
   fleet: "Fleet number ",
   showing: "Showing ",
   vehicles: " vehicle/s",

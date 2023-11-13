@@ -3,6 +3,7 @@ import { InfoWindow } from "react-google-maps";
 
 import { lang } from "./lang";
 import { Bus, RouteStop } from "../../types";
+import { isSpeedUrlParamEnabled } from "../../helpers";
 
 type PopupProps = {
   isShown: boolean;
@@ -23,6 +24,10 @@ const Popup = ({ isShown, bus, route, dismiss }: PopupProps) => {
           {`${lang.fleetNum}${bus.BusId}`}
           <br />
           {bus.MnemoService && `${lang.service}${bus.MnemoService}`}
+          <br />
+          {isSpeedUrlParamEnabled() &&
+            bus.Speed >= 0 &&
+            `${lang.speed}${Math.floor(bus.Speed * 0.621371)} mph`}
         </h3>
 
         {route === null && lang.loading}
