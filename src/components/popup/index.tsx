@@ -19,8 +19,9 @@ const Popup = ({ isShown, bus, route, dismiss }: PopupProps) => {
   return (
     <InfoWindow onCloseClick={dismiss}>
       <div className="max-h-[172px] overflow-auto p-2">
-        <h3>
+        <h3 className="mb-2 font-bold">
           {`${lang.fleetNum}${bus.BusId}`}
+          <br />
           {bus.MnemoService && `${lang.service}${bus.MnemoService}`}
         </h3>
 
@@ -31,8 +32,9 @@ const Popup = ({ isShown, bus, route, dismiss }: PopupProps) => {
             {route
               .filter((stop: RouteStop) => !!stop.time)
               .map((stop) => (
-                <li key={stop.name}>
-                  {stop.name}: {stop.time}
+                <li key={stop.name} className="flex justify-between gap-2">
+                  <span>{stop.name}</span>
+                  <span>{stop.time}</span>
                 </li>
               ))}
           </ul>

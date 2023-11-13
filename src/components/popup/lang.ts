@@ -1,6 +1,6 @@
 export const lang = {
   fleetNum: "Fleet num: ",
-  service: ", Service: ",
+  service: "Service: ",
   loading: "Loading...",
   noJourney: "No journey details available",
 };

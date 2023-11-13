@@ -1,28 +1,22 @@
 import React, { Fragment, useState, useEffect, useRef } from "react";
 
-import { getBusesByService, getBusStops, getServices } from "../../dispatches";
 import { filterFleet, filterType } from "../../helpers";
 import { ALL } from "../../consts";
 import Markers from "../markers";
 import Map from "../map";
 import Menu from "../menu";
-import { Bus, MapType, Stop, Service } from "../../types";
+import { Bus, MapType } from "../../types";
+import { useGetBusesQuery, useGetServicesQuery } from "./apiSlice";
 
 const App = () => {
   const mapRef = useRef<MapType>();
-  const [buses, setBuses] = useState<Bus[]>([]);
-  const [stops, setStops] = useState<Stop[]>([]);
-  const [services, setServices] = useState<Service[]>([]);
   const [typeFilter, setTypeFilter] = useState<string>(ALL);
   const [fleetNumberFilter, setFleetNumber] = useState<string>("");
   const [serviceFilter, setServiceFilter] = useState<string>(ALL);
   const [showOutOfService, setShowOutOfService] = useState<boolean>(true);
 
-  useEffect(() => {
-    getBusesByService(ALL, setBuses);
-    getBusStops(setStops);
-    getServices(setServices);
-  }, []);
+  const { data: buses = [], refetch } = useGetBusesQuery(serviceFilter);
+  const { data: services = [] } = useGetServicesQuery();
 
   const filteredBuses = buses.filter((bus: Bus): boolean => {
     if (fleetNumberFilter) {
@@ -58,7 +52,7 @@ const App = () => {
       <Menu
         buses={filteredBuses}
         fleetNumberFilter={fleetNumberFilter}
-        refresh={() => getBusesByService(ALL, setBuses)}
+        refresh={refetch}
         serviceFilter={serviceFilter}
         services={services}
         setFleetNumber={setFleetNumber}
@@ -69,7 +63,7 @@ const App = () => {
         typeFilter={typeFilter}
       />
       <Map mapRef={mapRef}>
-        <Markers buses={filteredBuses} stops={stops} />
+        <Markers buses={filteredBuses} />
       </Map>
     </Fragment>
   );

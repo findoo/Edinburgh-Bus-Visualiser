@@ -1,14 +1,13 @@
 import React, { useState, Fragment } from "react";
 
 import Marker from "./marker";
-import { Bus, Stop } from "../../types";
+import { Bus } from "../../types";
 
 type MarkersProps = {
   buses: Bus[];
-  stops: Stop[];
 };
 
-const Markers = ({ buses, stops }: MarkersProps): JSX.Element => {
+const Markers = ({ buses }: MarkersProps): JSX.Element => {
   const [selectedBus, setSelected] = useState<Bus | null>(null);
 
   return (
@@ -19,7 +18,6 @@ const Markers = ({ buses, stops }: MarkersProps): JSX.Element => {
           bus={bus}
           isSelected={selectedBus?.BusId === bus.BusId}
           setSelected={setSelected}
-          stops={stops}
         />
       ))}
     </Fragment>

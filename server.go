@@ -13,7 +13,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	osgb "github.com/fofanov/go-osgb"
+	osgb "github.com/mjjbell/go-osgb"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )

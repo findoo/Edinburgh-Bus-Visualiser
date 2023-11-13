@@ -23,7 +23,7 @@ export function buildRoute(
       lat: bus.Lat,
       lng: bus.Lon,
     },
-    ...journeyTimes[0].journeyTimeDatas.map((upcomingStop) => {
+    ...journeyTimes[0]?.journeyTimeDatas?.map((upcomingStop) => {
       const matchedStop = stops.find((st) => st.stopId === upcomingStop.stopId);
       return {
         lat: matchedStop?.x,

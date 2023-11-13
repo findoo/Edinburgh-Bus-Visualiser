@@ -12,6 +12,23 @@ const Hoc = withScriptjs(
       defaultZoom={12}
       defaultCenter={EDINBURGH}
       mapTypeControl={false}
+      options={{
+        streetViewControl: false,
+        fullscreenControl: false,
+        mapTypeControl: false,
+        styles: [
+          {
+            featureType: "poi",
+            elementType: "labels",
+            stylers: [{ visibility: "off" }],
+          },
+          {
+            featureType: "transit",
+            elementType: "labels",
+            stylers: [{ visibility: "off" }],
+          },
+        ],
+      }}
     >
       {children}
     </GoogleMap>

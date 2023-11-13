@@ -1,10 +1,9 @@
-import React, { Fragment, useState, useEffect } from "react";
+import React, { Fragment, memo, useMemo } from "react";
 import { Marker } from "react-google-maps";
 
 import lang from "./lang";
-import { getRouteData } from "../../dispatches";
 import { buildRoute } from "../../helpers";
-import { Bus, BusIcons, Stop, RouteStop } from "../../types";
+import { Bus, BusIcons } from "../../types";
 import Popup from "../popup";
 import RoutePath from "../routePath";
 import airport from "./images/airport.png";
@@ -20,12 +19,12 @@ import {
   SERVICES_AIRPORT,
   TYPE_TRAM,
 } from "../../consts";
+import { useGetBusStopsQuery, useGetRouteDataQuery } from "../app/apiSlice";
 
 type MarkerProps = {
   bus: Bus;
   isSelected: boolean;
   setSelected: (bus: Bus | null) => void;
-  stops: Stop[];
 };
 
 const ICONS: BusIcons = {
@@ -62,49 +61,44 @@ const getIcon = (bus: Bus) => {
   return ICONS.bus;
 };
 
-const Markers = ({
-  bus,
-  isSelected,
-  setSelected,
-  stops,
-}: MarkerProps): JSX.Element => {
-  const [route, setRoute] = useState<RouteStop[] | null>([]);
+const Markers = memo(
+  ({ bus, isSelected, setSelected }: MarkerProps): JSX.Element => {
+    const { data: routeData } = useGetRouteDataQuery(bus, {
+      skip: !isSelected,
+    });
+    const { data: stops = [] } = useGetBusStopsQuery();
 
-  useEffect(() => {
-    setRoute(null);
+    const route = useMemo(
+      () =>
+        isSelected && routeData
+          ? buildRoute(bus, routeData.journeyTimes, stops)
+          : null,
+      [isSelected, routeData, bus, stops]
+    );
 
-    if (isSelected) {
-      getRouteData(bus)
-        .then((response) => {
-          if (response.data.journeyTimes.length) {
-            setRoute(buildRoute(bus, response.data.journeyTimes, stops));
-          }
-        })
-        .catch(() => {
-          setRoute([]);
-        });
-    }
-  }, [isSelected]);
-
-  return (
-    <Fragment>
-      <Marker
-        key={bus.BusId}
-        position={{ lat: bus.Lat, lng: bus.Lon }}
-        icon={getIcon(bus)}
-        title={`${lang.fleet}${bus.BusId}${lang.service}${bus.MnemoService}`}
-        onClick={() => setSelected(bus)}
-      >
-        <Popup
-          bus={bus}
-          route={route}
-          isShown={isSelected}
-          dismiss={() => setSelected(null)}
-        />
-      </Marker>
-      <RoutePath route={route} isShown={isSelected} />
-    </Fragment>
-  );
-};
+    return (
+      <Fragment>
+        <Marker
+          key={bus.BusId}
+          position={{ lat: bus.Lat, lng: bus.Lon }}
+          icon={{ url: getIcon(bus), scaledSize: { width: 34, height: 38 } }}
+          options={{
+            optimized: true,
+          }}
+          title={`${lang.fleet}${bus.BusId}${lang.service}${bus.MnemoService}`}
+          onClick={() => setSelected(bus)}
+        >
+          <Popup
+            bus={bus}
+            route={route}
+            isShown={isSelected}
+            dismiss={() => setSelected(null)}
+          />
+        </Marker>
+        <RoutePath route={route} isShown={isSelected} />
+      </Fragment>
+    );
+  }
+);
 
 export default Markers;
