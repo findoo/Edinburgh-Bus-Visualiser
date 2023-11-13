@@ -13,6 +13,11 @@ const RoutePath = ({ route, isShown }: RoutePathProps) => {
     return null;
   }
 
+  const isDark =
+    window.matchMedia &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const markerColor = isDark ? "#FFD700" : "#0000FF";
+
   return (
     <>
       {route.map((stop) => (
@@ -22,9 +27,9 @@ const RoutePath = ({ route, isShown }: RoutePathProps) => {
           radius={14}
           options={{
             clickable: false,
-            fillColor: "#0000FF",
+            fillColor: markerColor,
             fillOpacity: 1,
-            strokeColor: "#0000FF",
+            strokeColor: markerColor,
             strokeOpacity: 1,
             strokeWeight: 1,
           }}
