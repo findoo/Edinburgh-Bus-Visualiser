@@ -7,6 +7,7 @@ export type Bus = {
   RefService: string;
   JourneyId: string;
   NextStop: string;
+  NameDest: string;
   Speed: number;
 };
 

@@ -4,4 +4,5 @@ export const lang = {
   loading: "Loading...",
   noJourney: "No journey details available",
   speed: "Speed: ",
+  destination: "To: ",
 };

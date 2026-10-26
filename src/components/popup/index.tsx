@@ -30,7 +30,7 @@ const Popup = ({ isShown, bus, route, dismiss }: PopupProps) => {
             `${lang.speed}${Math.floor(bus.Speed * 0.621371)} mph`}
         </h3>
 
-        {route === null && lang.loading}
+        {/* {route === null && lang.loading}
         {route?.length === 0 && lang.noJourney}
         {route && !!route.length && (
           <ul>
@@ -43,7 +43,9 @@ const Popup = ({ isShown, bus, route, dismiss }: PopupProps) => {
                 </li>
               ))}
           </ul>
-        )}
+        )} */}
+
+        {bus.NameDest && <p>{`${lang.destination}${bus.NameDest}`}</p>}
       </div>
     </InfoWindow>
   );

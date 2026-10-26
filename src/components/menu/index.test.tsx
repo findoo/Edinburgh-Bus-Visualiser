@@ -29,6 +29,7 @@ const mockBus: Bus = {
   RefService: "1",
   JourneyId: "23",
   NextStop: "99",
+  NameDest: "Ocean Terminal",
   Type: "bus",
   Speed: 1,
 };

@@ -1,8 +1,8 @@
-import React, { Fragment, memo, useMemo } from "react";
+import React, { Fragment, memo } from "react";
 import { Marker } from "react-google-maps";
 
 import lang from "./lang";
-import { buildRoute } from "../../helpers";
+// import { buildRoute } from "../../helpers";
 import { Bus, BusIcons } from "../../types";
 import Popup from "../popup";
 import RoutePath from "../routePath";
@@ -19,7 +19,7 @@ import {
   SERVICES_AIRPORT,
   TYPE_TRAM,
 } from "../../consts";
-import { useGetBusStopsQuery, useGetRouteDataQuery } from "../app/apiSlice";
+// import { useGetBusStopsQuery, useGetRouteDataQuery } from "../app/apiSlice";
 
 type MarkerProps = {
   bus: Bus;
@@ -63,18 +63,20 @@ const getIcon = (bus: Bus) => {
 
 const Markers = memo(
   ({ bus, isSelected, setSelected }: MarkerProps): JSX.Element => {
-    const { data: routeData } = useGetRouteDataQuery(bus, {
-      skip: !isSelected,
-    });
-    const { data: stops = [] } = useGetBusStopsQuery();
+    // Transport for Edinburgh broke this!
+    // const { data: routeData } = useGetRouteDataQuery(bus, {
+    //   skip: !isSelected,
+    // });
+    // const { data: stops = [] } = useGetBusStopsQuery();
 
-    const route = useMemo(
-      () =>
-        isSelected && routeData
-          ? buildRoute(bus, routeData.journeyTimes, stops)
-          : null,
-      [isSelected, routeData, bus, stops]
-    );
+    // const route = useMemo(
+    //   () =>
+    //     isSelected && routeData
+    //       ? buildRoute(bus, routeData.journeyTimes, stops)
+    //       : null,
+    //   [isSelected, routeData, bus, stops]
+    // );
+    const route = null;
 
     return (
       <Fragment>

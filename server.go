@@ -1,187 +1,154 @@
 package main
 
 import (
-	"compress/gzip"
-	"crypto/md5"
-	"encoding/csv"
-	"encoding/hex"
 	"encoding/json"
-	"io/ioutil"
+	"fmt"
+	"io"
 	"log"
 	"net/http"
-	"os"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
-	osgb "github.com/mjjbell/go-osgb"
+
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
+
+// Transport for Edinburgh's app API: Lothian, Lothian Country, East Coast and trams
+const vehiclesURL = "https://lothianapi.com/vehicles/all"
 
 type Bus struct {
 	BusId        int
 	JourneyId    string
 	RefService   string
 	MnemoService string
-	OperatorId   string
-	RefDest      string
 	NameDest     string
 	NextStop     string
-	Speed        string
-	Bearing      string
+	Speed        float64
+	Bearing      int
 	LastTimeKnow string
 	Type         string
 	Lat          float64
 	Lon          float64
 }
 
-var trans, _ = osgb.NewOSTN15Transformer()
+type Service struct {
+	Mnemo string `json:"mnemo"`
+	Ref   string `json:"ref"`
+}
+
+type tfeVehicle struct {
+	VehicleID    string
+	TripID       string
+	TransitMode  string
+	Coordinate   struct{ Latitude, Longitude float64 }
+	LastUpdated  string
+	Bearing      int
+	Speed        float64
+	RouteName    string
+	Destination  string
+	NextStopCode string
+}
 
 var netClient = &http.Client{
 	Timeout: time.Second * 10,
 }
 
-func check(e error) {
-	if e != nil {
-		log.Fatal(e)
-	}
-}
-
 func main() {
 	router := mux.NewRouter()
-	fs := http.FileServer(http.Dir("static"))
-	router.Handle("/", fs)
-	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", fs))
 	router.HandleFunc("/getBus/{id}", getBuses).Methods("GET")
-	router.HandleFunc("/getBusStops", getBusStops).Methods("GET")
 	router.HandleFunc("/getServices", getServices).Methods("GET")
 	router.HandleFunc("/getBuses/{service}", getBuses).Methods("GET")
-	router.HandleFunc("/getRoute/{busId}/{journeyId}/{nextStop}", getRoute).Methods("GET")
+	// static/ holds the CRA build output
+	router.PathPrefix("/").Handler(http.FileServer(http.Dir("static")))
 
 	log.Println("Listening...")
-	log.Println(getAPIKey())
-	gzip := handlers.CompressHandler(router)
-	http.ListenAndServe(":3000", gzip)
+	gzip := handlers.CompressHandler(handlers.CORS()(router))
+	log.Fatal(http.ListenAndServe(":1234", gzip))
 }
 
-func getAPIKey() (key string) {
-	t := time.Now().Format("2006010215")
-	keyWithTime := "XXXXXXXXX" + t
-	hasher := md5.New()
-	hasher.Write([]byte(keyWithTime))
-	return hex.EncodeToString(hasher.Sum(nil))
+func fetchBuses() ([]Bus, error) {
+	rs, err := netClient.Get(vehiclesURL)
+	if err != nil {
+		return nil, err
+	}
+	defer rs.Body.Close()
+	if rs.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("TfE API returned %s", rs.Status)
+	}
+	return parseVehicles(rs.Body)
+}
+
+func parseVehicles(r io.Reader) ([]Bus, error) {
+	var feed struct{ Vehicles []tfeVehicle }
+	if err := json.NewDecoder(r).Decode(&feed); err != nil {
+		return nil, err
+	}
+
+	buses := make([]Bus, 0, len(feed.Vehicles))
+	for _, v := range feed.Vehicles {
+		t := "bus"
+		if v.TransitMode == "tram" {
+			t = "tram"
+		}
+		buses = append(buses, Bus{
+			BusId:        fleetNumber(v.VehicleID),
+			JourneyId:    v.TripID,
+			RefService:   v.RouteName,
+			MnemoService: v.RouteName,
+			NameDest:     v.Destination,
+			NextStop:     v.NextStopCode,
+			Speed:        v.Speed,
+			Bearing:      v.Bearing,
+			LastTimeKnow: v.LastUpdated,
+			Type:         t,
+			Lat:          v.Coordinate.Latitude,
+			Lon:          v.Coordinate.Longitude,
+		})
+	}
+	return buses, nil
+}
+
+// Trams are prefixed, e.g. "T263"
+func fleetNumber(id string) int {
+	n, _ := strconv.Atoi(strings.TrimPrefix(id, "T"))
+	return n
 }
 
 func getServices(w http.ResponseWriter, req *http.Request) {
-	rs, err := netClient.Get("http://ws.mybustracker.co.uk/?module=json&key=" + getAPIKey() + "&function=getServices")
-	check(err)
-	defer rs.Body.Close()
+	buses, err := fetchBuses()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadGateway)
+		return
+	}
 
-	bodyBytes, err := ioutil.ReadAll(rs.Body)
-	check(err)
-	w.Write(bodyBytes)
+	// ponytail: only services currently running, a GTFS timetable import would list them all
+	seen := map[string]bool{}
+	services := []Service{}
+	for _, bus := range buses {
+		if bus.RefService != "" && !seen[bus.RefService] {
+			seen[bus.RefService] = true
+			services = append(services, Service{bus.MnemoService, bus.RefService})
+		}
+	}
+	sort.Slice(services, func(i, k int) bool { return services[i].Mnemo < services[k].Mnemo })
+
+	json.NewEncoder(w).Encode(map[string][]Service{"services": services})
 }
 
 func getBuses(w http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
-	rs, err := netClient.Get("http://ws.mybustracker.co.uk/?module=csv&key=" + getAPIKey() + "&function=getVehicleLocations")
-	check(err)
-	defer rs.Body.Close()
-
-	bodyBytes, err := ioutil.ReadAll(rs.Body)
-	check(err)
-
-	ioutil.WriteFile("/tmp/dat", bodyBytes, 0644)
-	f, err := os.Open("/tmp/dat")
-	check(err)
-	defer f.Close()
-
-	gr, err := gzip.NewReader(f)
-	check(err)
-	defer gr.Close()
-
-	cr := csv.NewReader(gr)
-	rec, err := cr.ReadAll()
-	check(err)
-
-	busLocationParsing(rec, w, params["service"], params["id"])
-}
-
-func getBusStops(w http.ResponseWriter, req *http.Request) {
-	rs, err := netClient.Get("http://ws.mybustracker.co.uk/?module=json&key=" + getAPIKey() + "&function=getBusStops")
-	check(err)
-	defer rs.Body.Close()
-
-	bodyBytes, err := ioutil.ReadAll(rs.Body)
-	check(err)
-	w.Write(bodyBytes)
-}
-
-func getRoute(w http.ResponseWriter, req *http.Request) {
-	params := mux.Vars(req)
-	rs, err := netClient.Get("http://ws.mybustracker.co.uk/?module=json&key=" + getAPIKey() + "&function=getJourneyTimes&stopId=" + params["nextStop"] + "&journeyId=" + params["journeyId"] + "&busId=" + params["busId"])
-	check(err)
-	defer rs.Body.Close()
-
-	bodyBytes, err := ioutil.ReadAll(rs.Body)
-	check(err)
-	w.Write(bodyBytes)
-}
-
-func getType(mnemoService string, busId int) (t string) {
-	switch mnemoService {
-	case "N":
-		return "night"
-	case "T":
-		return "tram"
-	default:
-		if busId >= 251 && busId <= 277 {
-			return "tram"
-		} else {
-			return "bus"
-		}
+	buses, err := fetchBuses()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadGateway)
+		return
 	}
+
+	busLocationParsing(buses, w, params["service"], params["id"])
 }
 
-func Map(vs [][]string, f func([]string) Bus) []Bus {
-	vsm := make([]Bus, len(vs))
-	for i, v := range vs {
-		vsm[i] = f(v)
-	}
-	return vsm
-}
-
-func parse(in []string) (bus Bus) {
-	t := Bus{}
-	busId, _ := strconv.Atoi(in[0])
-	t.BusId = busId
-	t.JourneyId = in[1]
-	t.RefService = in[2]
-	t.MnemoService = in[3]
-	t.OperatorId = in[4]
-	t.RefDest = in[5]
-	t.NameDest = in[6]
-	t.NextStop = in[7]
-	x, _ := strconv.ParseFloat(in[8], 64)
-	y, _ := strconv.ParseFloat(in[9], 64)
-	t.Speed = in[10]
-	t.Bearing = in[11]
-	t.LastTimeKnow = in[12]
-	t.Type = getType(t.MnemoService, t.BusId)
-
-	nationalGridCoord := osgb.NewOSGB36Coord(x, y, 0)
-	gpsCoord, _ := trans.FromNationalGrid(nationalGridCoord)
-
-	if gpsCoord != nil {
-		t.Lat = gpsCoord.Lat
-		t.Lon = gpsCoord.Lon
-	}
-	return t
-}
-
-func busLocationParsing(lines [][]string, w http.ResponseWriter, service string, id string) {
-	buses := Map(lines[1:], parse)
-
+func busLocationParsing(buses []Bus, w http.ResponseWriter, service string, id string) {
 	var minFleetId, maxFleetId int
 	if len(id) > 0 {
 		strippedId := strings.Replace(id, " ", "", -1)
@@ -195,7 +162,7 @@ func busLocationParsing(lines [][]string, w http.ResponseWriter, service string,
 		}
 	}
 
-	var output []Bus
+	output := []Bus{}
 	for _, bus := range buses {
 		if len(service) > 0 {
 			if service == "All" || bus.RefService == service {
